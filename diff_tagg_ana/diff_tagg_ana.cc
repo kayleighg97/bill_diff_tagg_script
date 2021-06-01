@@ -67,12 +67,18 @@
 
 #include <phool/PHCompositeNode.h>
 
+#include <stdio.h>
 
 #include <fun4all/Fun4AllHistoManager.h>
 
+#include <phool/PHCompositeNode.h>
+#include <phool/PHIODataNode.h>
+#include <phool/PHNode.h>  // for PHNode
+#include <phool/PHNodeIterator.h>
+#include <phool/PHObject.h>  // for PHObject
+#include <phool/PHRandomSeed.h>
 #include <phool/getClass.h>
-
-
+#include <phool/phool.h>
 
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
@@ -84,6 +90,9 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_rng.h>
 
 using namespace std;
 
@@ -101,6 +110,13 @@ diff_tagg_ana::diff_tagg_ana(const std::string &name, const std::string& filenam
  , outfilename(filename)
 {
   std::cout << "Diff_Tagg_example::Diff_Tagg_example(const std::string &name) Calling ctor" << std::endl;
+
+
+  unsigned int seed = PHRandomSeed();  // fixed seed is handled in this funtcion
+  m_RandomGenerator = gsl_rng_alloc(gsl_rng_mt19937);
+  gsl_rng_set(m_RandomGenerator, seed);
+
+
 }
 
 
@@ -109,6 +125,9 @@ diff_tagg_ana::diff_tagg_ana(const std::string &name, const std::string& filenam
 //____________________________________________________________________________..
 diff_tagg_ana::~diff_tagg_ana()
 {
+
+  gsl_rng_free(m_RandomGenerator);
+
   std::cout << "diff_tagg_ana::~diff_tagg_ana() Calling dtor" << std::endl;
 }
 
@@ -124,6 +143,20 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   g4hitntuple = new TNtuple("hitntup", "G4Hits", "x0:y0:z0:x1:y1:z1:edep");
 
   std::cout << "diff_tagg_ana::Init(PHCompositeNode *topNode) Initializing" << std::endl;
+
+  event_itt = 0;
+
+
+  h2_ZDC_XY = new TH2F("ZDC_XY", "ZDC XY", 200, -50, 50, 200, -50, 50);
+
+  h2_ZDC_XY_double = new TH2F("ZDC_XY_double", "ZDC XY Double gamma", 200, -50, 50, 200, -50, 50);
+
+  h1_E_dep = new TH1F("E_dep", "E Dependence", 120, 0.0, 60.0);
+
+  h1_E_dep_smeared = new TH1F("E_dep_smeared", "E Dependence Smeared", 120, 0.0, 60.0);
+
+
+
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -137,8 +170,16 @@ int diff_tagg_ana::InitRun(PHCompositeNode *topNode)
 //____________________________________________________________________________..
 int diff_tagg_ana::process_event(PHCompositeNode *topNode)
 {
-  std::cout << "diff_tagg_ana::process_event(PHCompositeNode *topNode) Processing Event" << std::endl;
+//  std::cout << "diff_tagg_ana::process_event(PHCompositeNode *topNode) Processing Event" << std::endl;
+
+  
+  ZDC_hit = 0;
+
+  event_itt++; 
  
+  if(event_itt%100 == 0)
+     std::cout << "Event Processing Counter: " << event_itt << endl;
+
   process_g4hits(topNode);
 
   return Fun4AllReturnCodes::EVENT_OK;
@@ -147,7 +188,8 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
 //____________________________________________________________________________..
 int diff_tagg_ana::ResetEvent(PHCompositeNode *topNode)
 {
-  std::cout << "diff_tagg_ana::ResetEvent(PHCompositeNode *topNode) Resetting internal structures, prepare for next event" << std::endl;
+//  std::cout << "diff_tagg_ana::ResetEvent(PHCompositeNode *topNode) Resetting internal structures, prepare for next event" << std::endl;
+//
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -162,6 +204,13 @@ int diff_tagg_ana::EndRun(const int runnumber)
 int diff_tagg_ana::End(PHCompositeNode *topNode)
 {
   std::cout << "diff_tagg_ana::End(PHCompositeNode *topNode) This is the End..." << std::endl;
+
+
+//  h2_ZDC_XY->Write();
+//  h2_ZDC_XY_double->Write();
+//  
+//  h1_E_dep->Write();
+//  h1_E_dep_smeared->Write();
 
   outfile->cd();
   g4hitntuple->Write();
@@ -187,9 +236,6 @@ void diff_tagg_ana::Print(const std::string &what) const
 }
 
 
-
-
-
 //***************************************************
 //
 
@@ -207,20 +253,28 @@ int diff_tagg_ana::process_g4hits(PHCompositeNode* topNode)
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
 
+//  cout << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa " << endl;
 
-  cout << "Which detector ???  ???   " << nodename.str().c_str() << endl; 
+
+  float smeared_E;
 
 
-  if (hits)
-  {
-    // this returns an iterator to the beginning and the end of our G4Hits
+  if (hits) {
+//    // this returns an iterator to the beginning and the end of our G4Hits
     PHG4HitContainer::ConstRange hit_range = hits->getHits();
     for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
 
     {
+//	HIT_IN_ZDC=true;
+	ZDC_hit++;
+    }
 
-      cout << "AAA" << endl;
+    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++) {
 
+
+//	ZDC_hit++;
+
+//      cout << "AAA" << endl;
       // the pointer to the G4Hit is hit_iter->second
       g4hitntuple->Fill(hit_iter->second->get_x(0),
                         hit_iter->second->get_y(0),
@@ -231,23 +285,88 @@ int diff_tagg_ana::process_g4hits(PHCompositeNode* topNode)
                         hit_iter->second->get_edep());
 
 
-//	hit_iter->get_avg_t();
 
+//      cout << hit_iter->second->get_x(0)-90 << "   " << hit_iter->second->get_y(0) << endl;
+
+
+      h2_ZDC_XY->Fill(hit_iter->second->get_x(0)-90, hit_iter->second->get_y(0)); 
+//
+      smeared_E = EMCAL_Smear(hit_iter->second->get_edep());
+//
+      if (ZDC_hit == 2 ) {
+
+//      cout << hit_iter->second->get_x(0)-90 << "   " << hit_iter->second->get_y(0) << endl;
+
+        h2_ZDC_XY_double->Fill(hit_iter->second->get_x(0)-90, hit_iter->second->get_y(0)); 
+//      h1_E_dep->Fill(hit_iter->second->get_edep()); 
+//
+        h1_E_dep->Fill(hit_iter->second->get_edep()); 
+        h1_E_dep_smeared->Fill(smeared_E); 
+//
+      }
+//
+//
+//
+////	hit_iter->get_avg_t();
 
     }
   }
 
-  
-
-  
-
-
-
-  cout << "BB" << endl;
+//  cout << "BB" << endl;
 
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
 
+//*****************************************************
+
+float diff_tagg_ana::EMCAL_Smear(float E) {
+
+  float resolution, E_reco;
+
+  resolution = sqrt(.45*.45/E + 0.075*0.075);
+  E_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * E;
+
+  return E_reco;
+}
+
+
+//*****************************************************
+
+float diff_tagg_ana::HCAL_Smear(float E) {
+
+  float resolution, E_reco;
+
+  resolution = sqrt(.50*.50/E + 0.1*0.1);
+  E_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * E;
+
+  return E_reco;
+}
+
+//*****************************************************
+
+float diff_tagg_ana::PbWO4_Smear(float E) {
+
+  float resolution, E_reco;
+
+  resolution = sqrt(.25*.25/E + 0.04*0.04);
+  E_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * E;
+
+  return E_reco;
+
+}
+
+//*****************************************************
+
+float diff_tagg_ana::Position_Smear(float P) {
+
+  float resolution, P_reco;
+
+  resolution = 1;
+  P_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * P;
+
+  return P_reco;
+
+}
 
 
