@@ -10,7 +10,9 @@ AM_LDFLAGS = \
 AM_CPPFLAGS = \
   -I$(includedir) \
   -I$(OFFLINE_MAIN)/include \
-  -I$(ROOTSYS)/include
+  -I$(ROOTSYS)/include \
+  -I/cvmfs/eic.opensciencegrid.org/x8664_sl7/opt/fun4all/core/gsl-2.6/include 
+
 
 pkginclude_HEADERS = \
   diff_tagg_ana.h
@@ -30,8 +32,11 @@ libdifftaggana_la_LDFLAGS  = \
   -lcalo_io \
   -lfun4all \
   -lg4detectors_io \
-  -lphg4hit
-
+  -lphg4hit\
+   -L/cvmfs/eic.opensciencegrid.org/x8664_sl7/opt/fun4all/core/gsl-2.6/lib \ 
+   -lgsl \ 
+   -lgslcblas \ 
+    -lm
 
 ################################################
 # linking tests
