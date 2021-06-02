@@ -362,7 +362,7 @@ float diff_tagg_ana::Position_Smear(float P) {
 
   float resolution, P_reco;
 
-  resolution = 1;
+  resolution = 0.1;         /// Position resolution 0.1 cm
   P_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * P;
 
   return P_reco;
