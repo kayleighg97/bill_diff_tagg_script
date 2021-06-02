@@ -1,1 +1,1 @@
-G4EICDetector_pi0_50k.root
+G4EICDetector.root
