@@ -182,6 +182,8 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
 
   process_g4hits(topNode);
 
+  process_RomanPots(topNode);
+
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -313,6 +315,40 @@ int diff_tagg_ana::process_g4hits(PHCompositeNode* topNode)
   }
 
 //  cout << "BB" << endl;
+
+  return Fun4AllReturnCodes::EVENT_OK;
+}
+
+
+//***************************************************
+// Getting the RomanPots hits
+
+int diff_tagg_ana::process_RomanPots(PHCompositeNode* topNode)
+{
+  ostringstream nodename;
+
+  // loop over the G4Hits
+  nodename.str("");
+//  nodename << "G4HIT_" << detector;
+//  nodename << "G4HIT_" << "ZDC";
+  nodename << "G4HIT_" << "RomanPots";
+//  nodename << "G4HIT_" << "EEMC";
+
+  PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
+
+
+  if (hits) {
+//    // this returns an iterator to the beginning and the end of our G4Hits
+    PHG4HitContainer::ConstRange hit_range = hits->getHits();
+
+    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++) {
+
+
+	cout << "Roman pot hits? " << endl;
+	cout << "This is where you can fill your loop " << endl;
+
+      }
+    }
 
   return Fun4AllReturnCodes::EVENT_OK;
 }

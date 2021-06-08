@@ -64,6 +64,7 @@ class diff_tagg_ana : public SubsysReco
   void Print(const std::string &what = "ALL") const override;
 
   int process_g4hits(PHCompositeNode *);
+  int process_RomanPots(PHCompositeNode *);
 
 // private:
 
