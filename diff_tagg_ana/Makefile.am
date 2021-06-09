@@ -11,7 +11,9 @@ AM_CPPFLAGS = \
   -I$(includedir) \
   -I$(OFFLINE_MAIN)/include \
   -I$(ROOTSYS)/include \
-  -I/cvmfs/eic.opensciencegrid.org/x8664_sl7/opt/fun4all/core/gsl-2.6/include 
+  -isystem ${G4_MAIN}/include
+
+#  -I/cvmfs/eic.opensciencegrid.org/x8664_sl7/opt/fun4all/core/gsl-2.6/include 
 
 
 pkginclude_HEADERS = \
@@ -33,10 +35,11 @@ libdifftaggana_la_LDFLAGS  = \
   -lfun4all \
   -lg4detectors_io \
   -lphg4hit\
-   -L/cvmfs/eic.opensciencegrid.org/x8664_sl7/opt/fun4all/core/gsl-2.6/lib \ 
-   -lgsl \ 
-   -lgslcblas \ 
-    -lm
+  -lgsl \
+  -lgslcblas 
+   
+#   -L/cvmfs/eic.opensciencegrid.org/x8664_sl7/opt/fun4all/core/gsl-2.6/lib \ 
+#   \ -lm
 
 ################################################
 # linking tests
