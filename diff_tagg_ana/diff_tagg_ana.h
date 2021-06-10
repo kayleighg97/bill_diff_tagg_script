@@ -63,8 +63,13 @@ class diff_tagg_ana : public SubsysReco
 
   void Print(const std::string &what = "ALL") const override;
 
-  int process_g4hits(PHCompositeNode *);
-  int process_RomanPots(PHCompositeNode *);
+  int process_g4hits_ZDC(PHCompositeNode *);
+  int process_g4hits_RomanPots(PHCompositeNode *);
+
+
+  int process_g4hits(PHCompositeNode *, const std::string&);
+  int process_g4clusters(PHCompositeNode *, const std::string&);
+
 
 // private:
 
@@ -76,6 +81,7 @@ class diff_tagg_ana : public SubsysReco
 
   TFile *outfile;
   TNtuple *g4hitntuple;
+  TNtuple *clusterntuple;
 
   unsigned long long int event_itt;
   gsl_rng* m_RandomGenerator;

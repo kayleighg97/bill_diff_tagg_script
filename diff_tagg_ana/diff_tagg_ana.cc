@@ -80,8 +80,13 @@
 #include <phool/getClass.h>
 #include <phool/phool.h>
 
+// G4Hits includes
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitContainer.h>
+
+// Cluster includes
+#include <calobase/RawCluster.h>
+#include <calobase/RawClusterContainer.h>
 
 #include <TFile.h>
 #include <TNtuple.h>
@@ -180,9 +185,26 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
   if(event_itt%100 == 0)
      std::cout << "Event Processing Counter: " << event_itt << endl;
 
-  process_g4hits(topNode);
+  process_g4hits_ZDC(topNode);
 
-  process_RomanPots(topNode);
+  process_g4hits_RomanPots(topNode);
+
+
+  ////-------------------------
+  ////Example for Getting the Hadron end cap hits and clusters
+  //// uncommenting the following line:
+  ///// for inner Hadron end cap  
+  // process_g4hits(topNode, "HCALIN");
+  // process_g4clusters(topNode, "HCALIN");
+  //
+  ///// for outer Hadron end cap  
+  // process_g4hits(topNode, "HCALOUT");
+  // process_g4clusters(topNode, "HCALOUT");
+  //
+  //// for Electron end cap  
+  // process_g4hits(topNode, "EEMC");
+  // process_g4clusters(topNode, "EEMC");
+  //
 
   return Fun4AllReturnCodes::EVENT_OK;
 }
@@ -242,7 +264,7 @@ void diff_tagg_ana::Print(const std::string &what) const
 //
 
 
-int diff_tagg_ana::process_g4hits(PHCompositeNode* topNode)
+int diff_tagg_ana::process_g4hits_ZDC(PHCompositeNode* topNode)
 {
   ostringstream nodename;
 
@@ -323,15 +345,18 @@ int diff_tagg_ana::process_g4hits(PHCompositeNode* topNode)
 //***************************************************
 // Getting the RomanPots hits
 
-int diff_tagg_ana::process_RomanPots(PHCompositeNode* topNode)
+int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 {
   ostringstream nodename;
+
+
+  cout << "Entering Romanpot?" << endl;
 
   // loop over the G4Hits
   nodename.str("");
 //  nodename << "G4HIT_" << detector;
 //  nodename << "G4HIT_" << "ZDC";
-  nodename << "G4HIT_" << "RomanPots";
+  nodename << "G4HIT_" << "RomanPots_0";
 //  nodename << "G4HIT_" << "EEMC";
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
@@ -405,4 +430,60 @@ float diff_tagg_ana::Position_Smear(float P) {
 
 }
 
+
+
+
+int diff_tagg_ana::process_g4hits(PHCompositeNode* topNode, const std::string& detector)
+{
+  ostringstream nodename;
+
+  // loop over the G4Hits
+  nodename.str("");
+  nodename << "G4HIT_" << detector;
+  PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
+  if (hits)
+  {
+    // this returns an iterator to the beginning and the end of our G4Hits
+    PHG4HitContainer::ConstRange hit_range = hits->getHits();
+    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++)
+
+    {
+      // the pointer to the G4Hit is hit_iter->second
+      g4hitntuple->Fill(hit_iter->second->get_x(0),
+                        hit_iter->second->get_y(0),
+                        hit_iter->second->get_z(0),
+                        hit_iter->second->get_x(1),
+                        hit_iter->second->get_y(1),
+                        hit_iter->second->get_z(1),
+                        hit_iter->second->get_edep());
+    }
+  }
+  return Fun4AllReturnCodes::EVENT_OK;
+}
+
+
+
+
+
+int diff_tagg_ana::process_g4clusters(PHCompositeNode* topNode, const string& detector)
+{
+  ostringstream nodename;
+
+  // loop over the G4Hits
+  nodename.str("");
+  nodename << "CLUSTER_" << detector;
+  RawClusterContainer* clusters = findNode::getClass<RawClusterContainer>(topNode, nodename.str().c_str());
+  if (clusters)
+  {
+    RawClusterContainer::ConstRange cluster_range = clusters->getClusters();
+    for (RawClusterContainer::ConstIterator cluster_iter = cluster_range.first; cluster_iter != cluster_range.second; cluster_iter++)
+    {
+      clusterntuple->Fill(cluster_iter->second->get_phi(),
+                          cluster_iter->second->get_z(),
+                          cluster_iter->second->get_energy(),
+                          cluster_iter->second->getNTowers());
+    }
+  }
+  return Fun4AllReturnCodes::EVENT_OK;
+}
 
