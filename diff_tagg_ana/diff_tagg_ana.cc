@@ -189,6 +189,8 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
 
   process_g4hits_RomanPots(topNode);
 
+  process_g4hits_B0(topNode);
+
 
   ////-------------------------
   ////Example for Getting the Hadron end cap hits and clusters
@@ -272,7 +274,8 @@ int diff_tagg_ana::process_g4hits_ZDC(PHCompositeNode* topNode)
   nodename.str("");
 //  nodename << "G4HIT_" << detector;
 //  nodename << "G4HIT_" << "ZDC";
-  nodename << "G4HIT_" << "ZDC";
+//  nodename << "G4HIT_" << "EICG4ZDC";
+  nodename << "G4HIT_" << "zdcTruth";
 //  nodename << "G4HIT_" << "EEMC";
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
@@ -350,13 +353,14 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
   ostringstream nodename;
 
 
-  cout << "Entering Romanpot?" << endl;
+//  cout << "Entering Romanpot?" << endl;
 
   // loop over the G4Hits
   nodename.str("");
 //  nodename << "G4HIT_" << detector;
 //  nodename << "G4HIT_" << "ZDC";
-  nodename << "G4HIT_" << "RomanPots_0";
+//  nodename << "G4HIT_" << "RomanPots_0";
+  nodename << "G4HIT_" << "rpTruth";
 //  nodename << "G4HIT_" << "EEMC";
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
@@ -377,6 +381,61 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 
   return Fun4AllReturnCodes::EVENT_OK;
 }
+
+
+//***************************************************
+// Getting the RomanPots hits
+
+int diff_tagg_ana::process_g4hits_B0(PHCompositeNode* topNode)
+{
+  ostringstream nodename;
+
+
+//  cout << "Entering Romanpot?" << endl;
+
+  // loop over the G4Hits
+  nodename.str("");
+//  nodename << "G4HIT_" << detector;
+//  nodename << "G4HIT_" << "ZDC";
+//  nodename << "G4HIT_" << "B0detectors_3";
+//  nodename << "G4HIT_" << "B0detectors_0";
+//  nodename << "G4HIT_" << "B0detectors_0";
+  nodename << "G4HIT_" << "b0Truth";
+//  nodename << "G4HIT_" << "EEMC";
+
+
+  cout << "Detector: " << nodename.str().c_str() << endl;
+
+  PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
+
+
+  if (hits) {
+//    // this returns an iterator to the beginning and the end of our G4Hits
+    PHG4HitContainer::ConstRange hit_range = hits->getHits();
+
+    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++) {
+
+
+	cout << "B0 hits? " << endl;
+	cout << "This is where you can fill your loop " << endl;
+
+      }
+    }
+
+  return Fun4AllReturnCodes::EVENT_OK;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //*****************************************************
