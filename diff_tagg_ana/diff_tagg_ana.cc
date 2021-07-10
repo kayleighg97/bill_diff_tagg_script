@@ -99,8 +99,17 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 
-using namespace std;
+/// HEPMC truth includes
+#include <HepMC/GenEvent.h>
+#include <HepMC/GenVertex.h>
+#include <phhepmc/PHHepMCGenEvent.h>
+#include <phhepmc/PHHepMCGenEventMap.h>
 
+/// Fun4All includes
+#include <g4main/PHG4Particle.h>
+#include <g4main/PHG4TruthInfoContainer.h>
+
+using namespace std;
 
 //____________________________________________________________________________..
 //diff_tagg_ana::diff_tagg_ana(const std::string &name):
@@ -160,7 +169,20 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
 
   h1_E_dep_smeared = new TH1F("E_dep_smeared", "E Dependence Smeared", 120, 0.0, 60.0);
 
+  //***********************8
 
+  m_mpi = -99;
+  m_process_id = -99;
+  m_truthenergy = -99;
+  m_trutheta = -99;
+  m_truthphi = -99;
+  m_truthp = -99;
+  m_truthpx = -99;
+  m_truthpy = -99;
+  m_truthpz = -99;
+  m_truthpt = -99;
+  m_numparticlesinevent = -99;
+  m_truthpid = -99;
 
   return Fun4AllReturnCodes::EVENT_OK;
 }
@@ -190,6 +212,10 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
   process_g4hits_RomanPots(topNode);
 
   process_g4hits_B0(topNode);
+
+
+  /// Getting the Truth information
+  process_PHG4Truth(topNode);
 
 
   ////-------------------------
@@ -265,6 +291,63 @@ void diff_tagg_ana::Print(const std::string &what) const
 //***************************************************
 //
 
+
+
+
+int diff_tagg_ana::process_PHG4Truth(PHCompositeNode* topNode) {
+
+ PHG4TruthInfoContainer *truthinfo = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
+
+  if (!truthinfo)
+  {
+    cout << PHWHERE
+         << "PHG4TruthInfoContainer node is missing, can't collect G4 truth particles"
+         << endl;
+    return Fun4AllReturnCodes::EVENT_OK;
+  }
+
+  /// Get the primary particle range
+  PHG4TruthInfoContainer::Range range = truthinfo->GetPrimaryParticleRange();
+
+  /// Loop over the G4 truth (stable) particles
+  for (PHG4TruthInfoContainer::ConstIterator iter = range.first;
+       iter != range.second;
+       ++iter)
+  {
+    /// Get this truth particle
+    const PHG4Particle *truth = iter->second;
+
+    /// Get this particles momentum, etc.
+    m_truthpx = truth->get_px();
+    m_truthpy = truth->get_py();
+    m_truthpz = truth->get_pz();
+    m_truthp = sqrt(m_truthpx * m_truthpx + m_truthpy * m_truthpy + m_truthpz * m_truthpz);
+    m_truthenergy = truth->get_e();
+
+    m_truthpt = sqrt(m_truthpx * m_truthpx + m_truthpy * m_truthpy);
+
+    m_truthphi = atan(m_truthpy / m_truthpx);
+
+    float m_trutheta = atanh(m_truthpz / m_truthenergy);
+    /// Check for nans
+    if (m_trutheta != m_trutheta)
+      m_trutheta = -99;
+    float m_truthpid = truth->get_pid();
+
+    cout << "truth: " << m_truthpid << "  " << m_truthpx << "  " << m_truthpy 
+         << "  " << m_truthpz << endl;
+
+    /// Fill the g4 truth tree
+//    m_truthtree->Fill();
+  }
+
+  return Fun4AllReturnCodes::EVENT_OK;
+
+}
+
+
+
+//***************************************************
 
 int diff_tagg_ana::process_g4hits_ZDC(PHCompositeNode* topNode)
 {

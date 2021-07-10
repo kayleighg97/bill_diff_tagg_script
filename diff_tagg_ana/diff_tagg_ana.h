@@ -65,11 +65,13 @@ class diff_tagg_ana : public SubsysReco
 
   int process_g4hits_ZDC(PHCompositeNode *);
   int process_g4hits_RomanPots(PHCompositeNode *);
+  int process_g4hits_B0(PHCompositeNode *);
 
 
   int process_g4hits(PHCompositeNode *, const std::string&);
   int process_g4clusters(PHCompositeNode *, const std::string&);
 
+  int process_PHG4Truth(PHCompositeNode* topNode);
 
 // private:
 
@@ -130,6 +132,22 @@ class diff_tagg_ana : public SubsysReco
 
   TH1F* h1_E_dep_smeared;
   TH1F* h1_E_dep;
+
+  //-------------------------------
+  int m_mpi;
+  int m_process_id;
+  double m_truthenergy;
+  double m_trutheta;
+  double m_truthphi;
+  double m_truthpx;
+  double m_truthpy;
+  double m_truthpz;
+  double m_truthpt;
+  double m_truthp;
+  int m_numparticlesinevent;
+  int m_truthpid;
+
+
 
 };
 
