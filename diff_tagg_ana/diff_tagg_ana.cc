@@ -160,6 +160,8 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
 
   event_itt = 0;
 
+  gDirectory->mkdir("ZDC");
+  gDirectory->cd("ZDC");
 
   h2_ZDC_XY = new TH2F("ZDC_XY", "ZDC XY", 200, -50, 50, 200, -50, 50);
 
@@ -168,6 +170,8 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   h1_E_dep = new TH1F("E_dep", "E Dependence", 120, 0.0, 60.0);
 
   h1_E_dep_smeared = new TH1F("E_dep_smeared", "E Dependence Smeared", 120, 0.0, 60.0);
+
+  gDirectory->cd("/");
 
   //***********************8
 
