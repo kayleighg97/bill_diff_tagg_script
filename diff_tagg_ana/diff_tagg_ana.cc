@@ -109,6 +109,11 @@
 #include <g4main/PHG4Particle.h>
 #include <g4main/PHG4TruthInfoContainer.h>
 
+
+#include <g4eval/SvtxEvalStack.h>
+//#include <coresoftware/blob/master/simulation/g4simulation/g4eval/SvtxEvalStack.h>
+#include "/cvmfs/eic.opensciencegrid.org/ecce/gcc-8.3/release/release_new/new.1/include/g4eval/SvtxEvalStack.h"
+
 using namespace std;
 
 //____________________________________________________________________________..
@@ -203,7 +208,14 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
 {
 //  std::cout << "diff_tagg_ana::process_event(PHCompositeNode *topNode) Processing Event" << std::endl;
 
-  
+
+//  exit(0);
+
+  SvtxEvalStack *_svtxEvalStack;
+
+  _svtxEvalStack = new SvtxEvalStack(topNode);
+  _svtxEvalStack->set_verbosity(Verbosity());
+
   ZDC_hit = 0;
 
   event_itt++; 
@@ -357,12 +369,13 @@ int diff_tagg_ana::process_g4hits_ZDC(PHCompositeNode* topNode)
 {
   ostringstream nodename;
 
+
   // loop over the G4Hits
   nodename.str("");
 //  nodename << "G4HIT_" << detector;
 //  nodename << "G4HIT_" << "ZDC";
 //  nodename << "G4HIT_" << "EICG4ZDC";
-  nodename << "G4HIT_" << "zdcTruth";
+  nodename << "G4HIT_" << "ZDCsurrogate";
 //  nodename << "G4HIT_" << "EEMC";
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
@@ -403,7 +416,7 @@ int diff_tagg_ana::process_g4hits_ZDC(PHCompositeNode* topNode)
 //      cout << hit_iter->second->get_x(0)-90 << "   " << hit_iter->second->get_y(0) << endl;
 
 
-      h2_ZDC_XY->Fill(hit_iter->second->get_x(0)-90, hit_iter->second->get_y(0)); 
+      h2_ZDC_XY->Fill(hit_iter->second->get_x(0)+90, hit_iter->second->get_y(0)); 
 //
       smeared_E = EMCAL_Smear(hit_iter->second->get_edep());
 //
@@ -411,7 +424,7 @@ int diff_tagg_ana::process_g4hits_ZDC(PHCompositeNode* topNode)
 
 //      cout << hit_iter->second->get_x(0)-90 << "   " << hit_iter->second->get_y(0) << endl;
 
-        h2_ZDC_XY_double->Fill(hit_iter->second->get_x(0)-90, hit_iter->second->get_y(0)); 
+        h2_ZDC_XY_double->Fill(hit_iter->second->get_x(0)+90, hit_iter->second->get_y(0)); 
 //      h1_E_dep->Fill(hit_iter->second->get_edep()); 
 //
         h1_E_dep->Fill(hit_iter->second->get_edep()); 
