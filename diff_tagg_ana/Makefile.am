@@ -36,8 +36,12 @@ libdifftaggana_la_LDFLAGS  = \
   -lg4detectors_io \
   -lphg4hit\
   -lgsl \
-  -lgslcblas 
-   
+  -lgslcblas \
+  -lg4eval_io \
+  -lg4eval \
+  -leiceval
+
+
 #   -L/cvmfs/eic.opensciencegrid.org/x8664_sl7/opt/fun4all/core/gsl-2.6/lib \ 
 #   \ -lm
 
