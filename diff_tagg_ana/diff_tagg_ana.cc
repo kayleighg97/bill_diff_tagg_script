@@ -109,6 +109,8 @@
 #include <g4main/PHG4Particle.h>
 #include <g4main/PHG4TruthInfoContainer.h>
 
+#include <g4main/EicEventHeader.h>
+
 
 #include <g4eval/SvtxEvalStack.h>
 //#include <coresoftware/blob/master/simulation/g4simulation/g4eval/SvtxEvalStack.h>
@@ -222,6 +224,32 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
  
   if(event_itt%100 == 0)
      std::cout << "Event Processing Counter: " << event_itt << endl;
+
+
+
+
+  ostringstream nodename;
+
+  // loop over the G4Hits
+  nodename.str("");
+  nodename << "EicEventHeader";
+
+
+  EicEventHeader* Evtheader = findNode::getClass<EicEventHeader>(topNode, nodename.str().c_str());
+
+
+  cout << "  asdasda weight?: " << Evtheader->get_demp_weight() << endl;
+
+
+//  for (EicEventHeader::ConstIterator iter = range.first;
+//       iter != range.second;
+//       ++iter)
+//  {
+//
+////	hit_iter->second
+//
+//  }
+
 
   process_g4hits_ZDC(topNode);
 
