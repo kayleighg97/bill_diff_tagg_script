@@ -466,6 +466,22 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
 
 
+
+  PHG4TruthInfoContainer *truthinfo = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
+
+  if (!truthinfo)
+  {
+    cout << PHWHERE
+         << "PHG4TruthInfoContainer node is missing, can't collect G4 truth particles"
+         << endl;
+    return Fun4AllReturnCodes::EVENT_OK;
+  }
+
+
+  /// Get the primary particle range
+  PHG4TruthInfoContainer::Range range = truthinfo->GetPrimaryParticleRange();
+
+  
   if (hits) {
 //    // this returns an iterator to the beginning and the end of our G4Hits
     PHG4HitContainer::ConstRange hit_range = hits->getHits();
@@ -475,6 +491,32 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 
 	cout << "Roman pot hits? " << endl;
 	cout << "This is where you can fill your loop " << endl;
+	
+
+
+	//---------------------------------
+
+ 	 /// Loop over the G4 truth (stable) particles
+ 	 for (PHG4TruthInfoContainer::ConstIterator iter = range.first;
+ 	      iter != range.second;
+ 	      ++iter)
+ 	 {
+ 	   /// Get this truth particle
+ 	   const PHG4Particle *truth = iter->second;
+
+
+
+           float m_trutheta = atanh(m_truthpz / m_truthenergy);
+    	   /// Check for nans
+    	   if (m_trutheta != m_trutheta)
+      	   m_trutheta = -99;
+
+	   cout << "Particle in Roman Pot: "<< truth->get_pid() << endl;
+	   cout << "Particle barcode: "<< truth->get_barcode() << endl;
+	   cout << "Particle primary ID: "<< truth->get_primary_id() << endl;
+//   	   float m_truthpid = truth->get_pid();
+
+	 }
 
       }
     }
