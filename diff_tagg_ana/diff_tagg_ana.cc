@@ -231,6 +231,8 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
 
 
   /// Getting the Truth information
+  process_PHG4Truth_Primary_Particles(topNode);
+
   process_PHG4Truth(topNode);
 
 
@@ -310,7 +312,7 @@ void diff_tagg_ana::Print(const std::string &what) const
 
 
 
-int diff_tagg_ana::process_PHG4Truth(PHCompositeNode* topNode) {
+int diff_tagg_ana::process_PHG4Truth_Primary_Particles(PHCompositeNode* topNode) {
 
  PHG4TruthInfoContainer *truthinfo = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
 
@@ -323,6 +325,7 @@ int diff_tagg_ana::process_PHG4Truth(PHCompositeNode* topNode) {
   }
 
   /// Get the primary particle range
+  ///PHG4TruthInfoContainer::Range range = truthinfo->GetPrimaryParticleRange();
   PHG4TruthInfoContainer::Range range = truthinfo->GetPrimaryParticleRange();
 
   /// Loop over the G4 truth (stable) particles
@@ -362,6 +365,60 @@ int diff_tagg_ana::process_PHG4Truth(PHCompositeNode* topNode) {
 }
 
 
+
+//***************************************************
+
+int diff_tagg_ana::process_PHG4Truth(PHCompositeNode* topNode) {
+
+ PHG4TruthInfoContainer *truthinfo = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
+
+  if (!truthinfo)
+  {
+    cout << PHWHERE
+         << "PHG4TruthInfoContainer node is missing, can't collect G4 truth particles"
+         << endl;
+    return Fun4AllReturnCodes::EVENT_OK;
+  }
+
+  /// Get the primary particle range
+  ///PHG4TruthInfoContainer::Range range = truthinfo->GetPrimaryParticleRange();
+  PHG4TruthInfoContainer::Range range = truthinfo->GetParticleRange();
+
+  /// Loop over the G4 truth (stable) particles
+  for (PHG4TruthInfoContainer::ConstIterator iter = range.first;
+       iter != range.second;
+       ++iter)
+  {
+    /// Get this truth particle
+    const PHG4Particle *truth = iter->second;
+
+    /// Get this particles momentum, etc.
+    m_truthpx = truth->get_px();
+    m_truthpy = truth->get_py();
+    m_truthpz = truth->get_pz();
+    m_truthp = sqrt(m_truthpx * m_truthpx + m_truthpy * m_truthpy + m_truthpz * m_truthpz);
+    m_truthenergy = truth->get_e();
+
+    m_truthpt = sqrt(m_truthpx * m_truthpx + m_truthpy * m_truthpy);
+
+    m_truthphi = atan(m_truthpy / m_truthpx);
+
+    float m_trutheta = atanh(m_truthpz / m_truthenergy);
+    /// Check for nans
+    if (m_trutheta != m_trutheta)
+      m_trutheta = -99;
+    float m_truthpid = truth->get_pid();
+
+    cout << "truth: " << m_truthpid << "  " << m_truthpx << "  " << m_truthpy 
+         << "  " << m_truthpz << endl;
+
+    /// Fill the g4 truth tree
+//    m_truthtree->Fill();
+  }
+
+  return Fun4AllReturnCodes::EVENT_OK;
+
+}
 
 //***************************************************
 
