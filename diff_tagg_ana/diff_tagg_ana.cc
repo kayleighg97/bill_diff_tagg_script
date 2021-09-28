@@ -548,8 +548,14 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 
 	cout << "Roman pot hits? " << endl;
 	cout << "This is where you can fill your loop " << endl;
-	
 
+
+	////************************************************************************
+	//// From hit to particle
+
+	PHG4Particle* g4particle = truthinfo->GetParticle(hit_iter->second->get_trkid());
+
+	g4particle->get_px();
 
 	//---------------------------------
 
