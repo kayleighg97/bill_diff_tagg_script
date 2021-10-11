@@ -1,0 +1,3 @@
+/work/eic2/ECCE/MC/prop.2/Diff_Tagg_IP6_41GeV_08.03.21/DiffractiveAndTagging/BeAGLE/ep-5x41-NeutronSS/DST_DiffractiveAndTagging_BeAGLE_ep-5x41-NeutronSS_000_0010000_01000.root
+/work/eic2/ECCE/MC/prop.2/Diff_Tagg_IP6_41GeV_08.03.21/DiffractiveAndTagging/BeAGLE/ep-5x41-NeutronSS/DST_DiffractiveAndTagging_BeAGLE_ep-5x41-NeutronSS_000_0018000_01000.root
+/work/eic2/ECCE/MC/prop.2/Diff_Tagg_IP6_41GeV_08.03.21/DiffractiveAndTagging/BeAGLE/ep-5x41-NeutronSS/DST_DiffractiveAndTagging_BeAGLE_ep-5x41-NeutronSS_000_0019000_01000.root

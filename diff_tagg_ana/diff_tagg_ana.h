@@ -72,6 +72,7 @@ class diff_tagg_ana : public SubsysReco
   int process_g4clusters(PHCompositeNode *, const std::string&);
 
   int process_PHG4Truth(PHCompositeNode* topNode);
+  int process_PHG4Truth_Primary_Particles(PHCompositeNode* topNode);
 
 // private:
 
