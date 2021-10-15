@@ -589,7 +589,7 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 
 
 //***************************************************
-// Getting the RomanPots hits
+// Getting the B0 hits
 
 int diff_tagg_ana::process_g4hits_B0(PHCompositeNode* topNode)
 {
@@ -609,7 +609,7 @@ int diff_tagg_ana::process_g4hits_B0(PHCompositeNode* topNode)
 //  nodename << "G4HIT_" << "EEMC";
 
 
-  cout << "Detector: " << nodename.str().c_str() << endl;
+//  cout << "Detector: " << nodename.str().c_str() << endl;
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
 
