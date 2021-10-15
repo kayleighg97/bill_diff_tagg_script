@@ -172,11 +172,18 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
 
   h2_ZDC_XY_double = new TH2F("ZDC_XY_double", "ZDC XY Double gamma", 200, -50, 50, 200, -50, 50);
 
+  h2_RP_XY_g = new TH2F("RP_XY_global", "RP_XY_global", 100, -135, -35, 100, -50, 50); 
+  h2_RP_XY_l = new TH2F("RP_XY_local", "RP_XY_local", 100, -50, 50, 100, -50, 50); 
+
+  h2_B0_XY_g = new TH2F("RP_B0_global", "RP_XY_global", 50, -50, 0, 50, -25, 25); 
+
   h1_E_dep = new TH1F("E_dep", "E Dependence", 120, 0.0, 60.0);
 
   h1_E_dep_smeared = new TH1F("E_dep_smeared", "E Dependence Smeared", 120, 0.0, 60.0);
 
   gDirectory->cd("/");
+	
+  cout << " !!!! " << endl;
 
   //***********************8
 
@@ -351,10 +358,13 @@ int diff_tagg_ana::process_PHG4Truth_Primary_Particles(PHCompositeNode* topNode)
     /// Check for nans
     if (m_trutheta != m_trutheta)
       m_trutheta = -99;
+
     float m_truthpid = truth->get_pid();
 
-    cout << "truth: " << m_truthpid << "  " << m_truthpx << "  " << m_truthpy 
-         << "  " << m_truthpz << endl;
+	m_truthpid = m_truthpid;
+
+//    cout << "truth: " << m_truthpid << "  " << m_truthpx << "  " << m_truthpy 
+//         << "  " << m_truthpz << endl;
 
     /// Fill the g4 truth tree
 //    m_truthtree->Fill();
@@ -409,8 +419,10 @@ int diff_tagg_ana::process_PHG4Truth(PHCompositeNode* topNode) {
       m_trutheta = -99;
     float m_truthpid = truth->get_pid();
 
-    cout << "truth: " << m_truthpid << "  " << m_truthpx << "  " << m_truthpy 
-         << "  " << m_truthpz << endl;
+	m_truthpid = m_truthpid;
+
+//    cout << "truth: " << m_truthpid << "  " << m_truthpx << "  " << m_truthpy 
+//         << "  " << m_truthpz << endl;
 
     /// Fill the g4 truth tree
 //    m_truthtree->Fill();
@@ -546,8 +558,8 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
     for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++) {
 
 
-	cout << "Roman pot hits? " << endl;
-	cout << "This is where you can fill your loop " << endl;
+//	cout << "Roman pot hits? " << endl;
+//	cout << "This is where you can fill your loop " << endl;
 
 
 	////************************************************************************
@@ -568,16 +580,23 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
  	   const PHG4Particle *truth = iter->second;
 
 
-
            float m_trutheta = atanh(m_truthpz / m_truthenergy);
     	   /// Check for nans
     	   if (m_trutheta != m_trutheta)
       	   m_trutheta = -99;
 
-	   cout << "Particle in Roman Pot: "<< truth->get_pid() << endl;
-	   cout << "Particle barcode: "<< truth->get_barcode() << endl;
-	   cout << "Particle primary ID: "<< truth->get_primary_id() << endl;
+          truth->get_pid();
+//	   cout << "Particle in Roman Pot: "<< truth->get_pid() << endl;
+//	   cout << "Particle barcode: "<< truth->get_barcode() << endl;
+//	   cout << "Particle primary ID: "<< truth->get_primary_id() << endl;
 //   	   float m_truthpid = truth->get_pid();
+
+		if (hit_iter->second->get_x(0) < -80.22 && hit_iter->second->get_x(0) > -86.22 ) {
+
+			h2_RP_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+			h2_RP_XY_l->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+
+		}
 
 	 }
 
@@ -621,8 +640,9 @@ int diff_tagg_ana::process_g4hits_B0(PHCompositeNode* topNode)
     for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++) {
 
 
-	cout << "B0 hits? " << endl;
-	cout << "This is where you can fill your loop " << endl;
+		h2_B0_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+//	cout << "B0 hits? " << endl;
+//	cout << "This is where you can fill your loop " << endl;
 
       }
     }
