@@ -198,8 +198,8 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   //**************
   // B0
 
-  gDirectory->mkdir("RP");
-  gDirectory->cd("RP");
+  gDirectory->mkdir("B0");
+  gDirectory->cd("B0");
 
   h2_B0_XY_g = new TH2F("RP_B0_global", "RP_XY_global", 50, -50, 0, 50, -25, 25); 
 
