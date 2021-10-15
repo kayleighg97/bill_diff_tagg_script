@@ -165,6 +165,9 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
 
   event_itt = 0;
 
+  //**************
+  // ZDC
+
   gDirectory->mkdir("ZDC");
   gDirectory->cd("ZDC");
 
@@ -172,18 +175,37 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
 
   h2_ZDC_XY_double = new TH2F("ZDC_XY_double", "ZDC XY Double gamma", 200, -50, 50, 200, -50, 50);
 
-  h2_RP_XY_g = new TH2F("RP_XY_global", "RP_XY_global", 100, -135, -35, 100, -50, 50); 
-  h2_RP_XY_l = new TH2F("RP_XY_local", "RP_XY_local", 100, -50, 50, 100, -50, 50); 
-
-  h2_B0_XY_g = new TH2F("RP_B0_global", "RP_XY_global", 50, -50, 0, 50, -25, 25); 
-
   h1_E_dep = new TH1F("E_dep", "E Dependence", 120, 0.0, 60.0);
 
   h1_E_dep_smeared = new TH1F("E_dep_smeared", "E Dependence Smeared", 120, 0.0, 60.0);
 
   gDirectory->cd("/");
+
+
+  //**************
+  // RP
 	
-  cout << " !!!! " << endl;
+  gDirectory->mkdir("RP");
+  gDirectory->cd("RP");
+
+  h2_RP_XY_g = new TH2F("RP_XY_global", "RP_XY_global", 100, -135, -35, 100, -50, 50); 
+  h2_RP_XY_l = new TH2F("RP_XY_local", "RP_XY_local", 100, -50, 50, 100, -50, 50); 
+  h2_RP_XY_signal = new TH2F("RP_XY_signal", "RP_XY_signal", 100, -50, 50, 100, -50, 50); 
+
+  gDirectory->cd("/");
+
+
+  //**************
+  // B0
+
+  gDirectory->mkdir("RP");
+  gDirectory->cd("RP");
+
+  h2_B0_XY_g = new TH2F("RP_B0_global", "RP_XY_global", 50, -50, 0, 50, -25, 25); 
+
+  gDirectory->cd("/");
+
+
 
   //***********************8
 
@@ -229,6 +251,8 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
  
   if(event_itt%100 == 0)
      std::cout << "Event Processing Counter: " << event_itt << endl;
+
+
 
   process_g4hits_ZDC(topNode);
 
@@ -591,12 +615,68 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 //	   cout << "Particle primary ID: "<< truth->get_primary_id() << endl;
 //   	   float m_truthpid = truth->get_pid();
 
-		if (hit_iter->second->get_x(0) < -80.22 && hit_iter->second->get_x(0) > -86.22 ) {
 
-			h2_RP_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
-			h2_RP_XY_l->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+//	   Float_t RP_rotation = 0.047; 
 
-		}
+
+
+// RP location 
+           
+           const int rpDetNr = 2;
+           const double rp_zCent[rpDetNr] = {2600, 2800};
+           const double rp_xCent[rpDetNr] = {-83.22, -92.20};
+	 
+	   float det_rot = atan( rp_xCent[0] / rp_zCent[0]); 
+	   float det_tilt = 0.047; 
+	   
+
+	   if (hit_iter->second->get_z(0) < 2650 && hit_iter->second->get_z(0) > 2550 ) {
+
+		h2_RP_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
+
+//		float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), 0.047, -0.025) ;
+
+//		float local_y = Get_Local_Y(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), 0.047, -0.025) ;
+
+		/// -0.03199676847625228 
+
+		float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
+
+		float local_y = Get_Local_Y(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
+               
+
+//		cout << det_tilt << endl;
+
+		h2_RP_XY_l->Fill(local_x, local_y);
+
+//		cout << hit_iter->second->get_x(0) << "   "  << hit_iter->second->get_y(0) << endl;
+//		cout << "local " << local_x << "   "  << local_y << endl;
+
+
+
+		//---------------------------------------------
+		// Standarized Roman pot cut
+		//
+		if (local_x > -5. && local_x < 5. && local_y > -1.0 && local_y < 1.0)  {
+
+			//// This is beam contribution here
+
+		} else {
+
+			////This is where you signal is!
+			//
+
+		     if (local_x > -12.5 && local_x < 12.5 && local_y > -5.0 && local_y < 5.0) {
+
+
+			h2_RP_XY_signal->Fill(local_x, local_y);
+
+
+		     } 
+
+		} 
+
+	    }
 
 	 }
 
@@ -745,9 +825,7 @@ int diff_tagg_ana::process_g4hits(PHCompositeNode* topNode, const std::string& d
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
-
-
-
+//*******************************************
 
 int diff_tagg_ana::process_g4clusters(PHCompositeNode* topNode, const string& detector)
 {
@@ -769,5 +847,33 @@ int diff_tagg_ana::process_g4clusters(PHCompositeNode* topNode, const string& de
     }
   }
   return Fun4AllReturnCodes::EVENT_OK;
+}
+
+
+//*******************************************
+
+float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z, float det_tilt, float det_rot) {
+
+	
+   TVector3 global_cor(global_x, global_y, global_z);
+
+   global_cor.RotateY(-det_rot);
+//   global_cor.RotateY(det_tilt);
+
+   float local_x = global_cor.X()/cos(det_tilt);
+//   float local_x = global_cor.X();
+//   cout << global_x << "    " << global_cor.X()<< "   " << local_x << endl;
+	
+   return local_x;
+
+}
+
+
+//*******************************************
+
+float diff_tagg_ana::Get_Local_Y(float global_x, float global_y, float global_z, float det_tilt, float cross_angle) {
+
+	return global_y;
+
 }
 

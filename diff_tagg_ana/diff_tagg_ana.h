@@ -97,6 +97,13 @@ class diff_tagg_ana : public SubsysReco
   float PbWO4_Smear(float E);
   float Position_Smear(float E);
 
+  //*********************************
+  // Coordinate transformation from global to local
+
+  float Get_Local_X(float global_x, float global_y, float global_z, float det_tilt, float det_rot);
+  float Get_Local_Y(float global_x, float global_y, float global_z, float det_tilt, float det_rot);
+
+
   //---------------------
   // From ejana
 
@@ -137,6 +144,7 @@ class diff_tagg_ana : public SubsysReco
   // Roman pots
   TH2F* h2_RP_XY_g; 
   TH2F* h2_RP_XY_l; 
+  TH2F* h2_RP_XY_signal; 
 
   // B0
   TH2F* h2_B0_XY_g; 
