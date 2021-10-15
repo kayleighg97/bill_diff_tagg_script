@@ -134,6 +134,13 @@ class diff_tagg_ana : public SubsysReco
   TH1F* h1_E_dep_smeared;
   TH1F* h1_E_dep;
 
+  // Roman pots
+  TH2F* h2_RP_XY_g; 
+  TH2F* h2_RP_XY_l; 
+
+  // B0
+  TH2F* h2_B0_XY_g; 
+
   //-------------------------------
   int m_mpi;
   int m_process_id;
