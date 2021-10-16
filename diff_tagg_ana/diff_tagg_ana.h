@@ -5,6 +5,9 @@
 
 #include <fun4all/SubsysReco.h>
 
+#include <fun4all/Fun4AllServer.h>
+#include <g4main/PHG4Reco.h>
+
 #include <string>
 
 #include <gsl/gsl_randist.h>

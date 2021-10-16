@@ -109,6 +109,11 @@
 #include <g4main/PHG4Particle.h>
 #include <g4main/PHG4TruthInfoContainer.h>
 
+#include <g4main/PHG4Reco.h>
+
+#include <fun4all/Fun4AllServer.h>
+#include <fun4all/Fun4AllDstInputManager.h>
+
 
 #include <g4eval/SvtxEvalStack.h>
 //#include <coresoftware/blob/master/simulation/g4simulation/g4eval/SvtxEvalStack.h>
@@ -130,11 +135,9 @@ diff_tagg_ana::diff_tagg_ana(const std::string &name, const std::string& filenam
 {
   std::cout << "Diff_Tagg_example::Diff_Tagg_example(const std::string &name) Calling ctor" << std::endl;
 
-
   unsigned int seed = PHRandomSeed();  // fixed seed is handled in this funtcion
   m_RandomGenerator = gsl_rng_alloc(gsl_rng_mt19937);
   gsl_rng_set(m_RandomGenerator, seed);
-
 
 }
 
@@ -153,6 +156,15 @@ diff_tagg_ana::~diff_tagg_ana()
 //____________________________________________________________________________..
 int diff_tagg_ana::Init(PHCompositeNode *topNode)
 {
+
+  Fun4AllServer *se = Fun4AllServer::instance();
+
+  Fun4AllInputManager*hitsin = (Fun4AllInputManager*) se->getInputManager("DSTin");
+
+//  hitsin->Print("1");
+
+  exit(0);
+  
 
   hm = new Fun4AllHistoManager(Name());
   // create and register your histos (all types) here
@@ -621,16 +633,19 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 
 
 // RP location 
-           
-           const int rpDetNr = 2;
-           const double rp_zCent[rpDetNr] = {2600, 2800};
-           const double rp_xCent[rpDetNr] = {-83.22, -92.20};
-	 
-	   float det_rot = atan( rp_xCent[0] / rp_zCent[0]); 
+     
+       const int rpDetNr = 2;
+	   double_t* rp_zCent;
+       double_t* rp_xCent;
 	   float det_tilt = 0.047; 
-	   
 
-	   if (hit_iter->second->get_z(0) < 2650 && hit_iter->second->get_z(0) > 2550 ) {
+       rp_zCent = new double_t[rpDetNr]{2600, 2800};
+       rp_xCent = new double_t[rpDetNr]{-83.22, -92.20};
+   	   det_tilt = 0.047;
+
+	   float det_rot = atan( rp_xCent[0] / rp_zCent[0]); 
+	  
+	   if (hit_iter->second->get_z(0) < rp_zCent[0]+50 && hit_iter->second->get_z(0) >rp_zCent[0]-50 ) {
 
 		h2_RP_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
 
