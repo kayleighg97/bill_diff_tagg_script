@@ -17,6 +17,8 @@
 #include "TH1.h"
 #include "TH2.h"
 
+#include <pdbcalbase/PdbParameterMap.h>
+#include <phparameter/PHParameters.h>
 
 class Fun4AllHistoManager;
 class PHCompositeNode;
@@ -92,6 +94,9 @@ class diff_tagg_ana : public SubsysReco
   unsigned long long int event_itt;
   gsl_rng* m_RandomGenerator;
 
+  int static_event_counter;
+
+
   //*********************************
   // Energy and Position smearing
 
@@ -105,7 +110,8 @@ class diff_tagg_ana : public SubsysReco
 
   float Get_Local_X(float global_x, float global_y, float global_z, float det_tilt, float det_rot);
   float Get_Local_Y(float global_x, float global_y, float global_z, float det_tilt, float det_rot);
-
+  float Get_Local_X(float global_x, float global_y, float global_z, PdbParameterMapContainer *det_nodeparams);
+//  float Get_Local_X(float global_x, float global_y, float global_z) {return 1;};
 
   //---------------------
   // From ejana
@@ -138,8 +144,11 @@ class diff_tagg_ana : public SubsysReco
 
   Int_t ZDC_hit;
 
-  TH2F* h2_ZDC_XY; 
-  TH2F* h2_ZDC_XY_double; 
+  TH2F* h2_ZDC_XY_g; 
+  TH2F* h2_ZDC_XY_g_double; 
+
+  TH2F* h2_ZDC_XY_l; 
+  TH2F* h2_ZDC_XY_l_double; 
 
   TH1F* h1_E_dep_smeared;
   TH1F* h1_E_dep;
@@ -166,6 +175,21 @@ class diff_tagg_ana : public SubsysReco
   int m_numparticlesinevent;
   int m_truthpid;
 
+  PHParameters Enclosure_params{"PHGEnclosure"};
+  PHParameters ZDC_params{"PHG4RP"};
+  PHParameters RP_1_params{"PHG4RP"};
+  PHParameters RP2_params{"PHG4RP2"};
+  PHParameters B0_params{"PHG4B0"};
+
+  PdbParameterMapContainer *encloseure_nodeparams; 
+  PdbParameterMapContainer *zdc_nodeparams; 
+  PdbParameterMapContainer *rp_nodeparams;
+  PdbParameterMapContainer *rp2_nodeparams;
+  PdbParameterMapContainer *b0_nodeparams;
+
+  TString IP_design;
+
+  
 
 
 };

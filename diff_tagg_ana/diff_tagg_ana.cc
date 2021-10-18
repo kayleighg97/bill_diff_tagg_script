@@ -114,6 +114,10 @@
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllDstInputManager.h>
 
+#include <pdbcalbase/PdbParameterMap.h>
+#include <phparameter/PHParameters.h>
+
+#include <pdbcalbase/PdbParameterMapContainer.h>
 
 #include <g4eval/SvtxEvalStack.h>
 //#include <coresoftware/blob/master/simulation/g4simulation/g4eval/SvtxEvalStack.h>
@@ -157,14 +161,7 @@ diff_tagg_ana::~diff_tagg_ana()
 int diff_tagg_ana::Init(PHCompositeNode *topNode)
 {
 
-  Fun4AllServer *se = Fun4AllServer::instance();
-
-  Fun4AllInputManager*hitsin = (Fun4AllInputManager*) se->getInputManager("DSTin");
-
-//  hitsin->Print("1");
-
-  exit(0);
-  
+  static_event_counter = 0;
 
   hm = new Fun4AllHistoManager(Name());
   // create and register your histos (all types) here
@@ -183,9 +180,12 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   gDirectory->mkdir("ZDC");
   gDirectory->cd("ZDC");
 
-  h2_ZDC_XY = new TH2F("ZDC_XY", "ZDC XY", 200, -50, 50, 200, -50, 50);
+  h2_ZDC_XY_g = new TH2F("ZDC_XY_g", "ZDC XY", 200, -200, 200, 200, -50, 50);
+  h2_ZDC_XY_g_double = new TH2F("ZDC_XY_g_double", "ZDC XY Double gamma", 200, -200, 200, 200, -50, 50);
 
-  h2_ZDC_XY_double = new TH2F("ZDC_XY_double", "ZDC XY Double gamma", 200, -50, 50, 200, -50, 50);
+  h2_ZDC_XY_l = new TH2F("ZDC_XY_l", "ZDC XY_l", 200, -50, 50, 200, -50, 50);
+  h2_ZDC_XY_l_double = new TH2F("ZDC_XY_l_double", "ZDC XY Double gamma", 200, -50, -50, 200, -50, 50);
+
 
   h1_E_dep = new TH1F("E_dep", "E Dependence", 120, 0.0, 60.0);
 
@@ -200,9 +200,13 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   gDirectory->mkdir("RP");
   gDirectory->cd("RP");
 
-  h2_RP_XY_g = new TH2F("RP_XY_global", "RP_XY_global", 100, -135, -35, 100, -50, 50); 
-  h2_RP_XY_l = new TH2F("RP_XY_local", "RP_XY_local", 100, -50, 50, 100, -50, 50); 
+//  h2_RP_XY_g = new TH2F("RP_XY_global", "RP_XY_global", 100, -500, 500, 100, -500, 500); 
+//  h2_RP_XY_l = new TH2F("RP_XY_local", "RP_XY_local", 100, -50, 50, 100, -50, 50); 
   h2_RP_XY_signal = new TH2F("RP_XY_signal", "RP_XY_signal", 100, -50, 50, 100, -50, 50); 
+
+  h2_RP_XY_g = new TH2F("RP_XY_global", "RP_XY_global", 200, 0, 200, 100, -100, 100); 
+  h2_RP_XY_l = new TH2F("RP_XY_local", "RP_XY_local", 200, -50, 50, 200, -50, 50); 
+
 
   gDirectory->cd("/");
 
@@ -213,7 +217,7 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   gDirectory->mkdir("B0");
   gDirectory->cd("B0");
 
-  h2_B0_XY_g = new TH2F("RP_B0_global", "RP_XY_global", 50, -50, 0, 50, -25, 25); 
+  h2_B0_XY_g = new TH2F("B0_XY_global", "B0_XY_global", 50, -50, 0, 50, -25, 25); 
 
   gDirectory->cd("/");
 
@@ -240,7 +244,76 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
 //____________________________________________________________________________..
 int diff_tagg_ana::InitRun(PHCompositeNode *topNode)
 {
-  std::cout << "diff_tagg_ana::InitRun(PHCompositeNode *topNode) Initializing for Run XXX" << std::endl;
+//  std::cout << "diff_tagg_ana::InitRun(PHCompositeNode *topNode) Initializing for Run XXX" << std::endl;
+//
+
+  if( static_event_counter == 0) {
+  
+  	encloseure_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_hFarFwdBeamLineEnclosure_0");
+
+        encloseure_nodeparams->Print();
+
+  	if (encloseure_nodeparams)
+  	{
+  	   Enclosure_params.FillFrom(encloseure_nodeparams, 0);
+  	} else {
+  	   cerr << "There is a issue finding the detector paramter node!" << endl;
+  	}
+
+  	zdc_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_ZDCsurrogate");
+  	zdc_nodeparams->print();
+  	
+  	if (zdc_nodeparams)
+  	{
+  	   ZDC_params.FillFrom(zdc_nodeparams, 0);
+  	} else {
+  	   cerr << "There is a issue finding the detector paramter node!" << endl;
+  	}
+//	
+//	  auto range = params.get_all_double_params(); //get all double etc.
+//	  for (auto iter = range.first; iter != range.second; ++iter)
+//	  {
+//	    const string &phg4hit_node_name = iter->first;
+//	    const int &phg4hit_node_id = iter->second;
+//	    cout << __PRETTY_FUNCTION__ << " Prepare PHG4Hit node name " << phg4hit_node_name
+//	         << " with ID = " << phg4hit_node_id << endl;
+//	  }
+  	
+//	  cout << "place_x: " << ZDC_params.get_double_param("place_x") << endl;
+//	  exit(0);
+  	
+  	rp_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_rpTruth");
+//  	rp_nodeparams->print();
+  	
+  	rp2_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_rpTruth2");
+//  	rp2_nodeparams->print();
+  	
+  	b0_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_b0Truth");
+//  	b0_nodeparams->print();
+  	
+  	static_event_counter++;
+
+
+       /// Determining which IP design
+
+	if (zdc_nodeparams) {
+  	   if (rp2_nodeparams) {
+		IP_design = "IP8";
+	   } else {
+		IP_design = "IP6";
+           }
+	} else {
+
+	   IP_design = "UNKNOWN";
+
+        }
+
+  }
+
+
+//  exit(0);
+
+
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -472,21 +545,18 @@ int diff_tagg_ana::process_PHG4Truth(PHCompositeNode* topNode) {
 
 int diff_tagg_ana::process_g4hits_ZDC(PHCompositeNode* topNode)
 {
-  ostringstream nodename;
 
-
-  // loop over the G4Hits
-  nodename.str("");
-//  nodename << "G4HIT_" << detector;
-//  nodename << "G4HIT_" << "ZDC";
-//  nodename << "G4HIT_" << "EICG4ZDC";
-  nodename << "G4HIT_" << "ZDCsurrogate";
-//  nodename << "G4HIT_" << "EEMC";
-
+   ostringstream nodename;
+ 
+   // loop over the G4Hits
+   nodename.str("");
+ //  nodename << "G4HIT_" << detector;
+ //  nodename << "G4HIT_" << "ZDC";
+ //  nodename << "G4HIT_" << "EICG4ZDC";
+   nodename << "G4HIT_" << "ZDCsurrogate";
+ //  nodename << "G4HIT_" << "EEMC";
+ 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
-
-//  cout << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa " << endl;
-
 
   float smeared_E;
 
@@ -521,7 +591,7 @@ int diff_tagg_ana::process_g4hits_ZDC(PHCompositeNode* topNode)
 //      cout << hit_iter->second->get_x(0)-90 << "   " << hit_iter->second->get_y(0) << endl;
 
 
-      h2_ZDC_XY->Fill(hit_iter->second->get_x(0)+90, hit_iter->second->get_y(0)); 
+      h2_ZDC_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0)); 
 //
       smeared_E = EMCAL_Smear(hit_iter->second->get_edep());
 //
@@ -529,13 +599,30 @@ int diff_tagg_ana::process_g4hits_ZDC(PHCompositeNode* topNode)
 
 //      cout << hit_iter->second->get_x(0)-90 << "   " << hit_iter->second->get_y(0) << endl;
 
-        h2_ZDC_XY_double->Fill(hit_iter->second->get_x(0)+90, hit_iter->second->get_y(0)); 
+        h2_ZDC_XY_g_double->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0)); 
 //      h1_E_dep->Fill(hit_iter->second->get_edep()); 
 //
         h1_E_dep->Fill(hit_iter->second->get_edep()); 
         h1_E_dep_smeared->Fill(smeared_E); 
 //
       }
+
+      float det_xCent = Enclosure_params.get_double_param("place_x") + ZDC_params.get_double_param("place_x");
+      float det_zCent = Enclosure_params.get_double_param("place_z") + ZDC_params.get_double_param("place_z");
+      float det_tilt = ZDC_params.get_double_param("rot_y")/180. * TMath::Pi(); // in Rad
+
+      float det_rot = atan( det_xCent / det_zCent);  // in Rad
+
+      float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
+      float local_y = Get_Local_Y(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
+
+      h2_ZDC_XY_l->Fill(local_x, local_y); 
+
+//      cout << "-------------" << endl;
+//      cout << hit_iter->second->get_x(0) << "    " << hit_iter->second->get_y(0) << "   " << det_tilt << "    " << det_rot << endl;;
+//      cout << local_x << "    "  << local_y << endl;
+
+
 //
 //
 //
@@ -633,65 +720,83 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 
 
 // RP location 
-     
-       const int rpDetNr = 2;
-	   double_t* rp_zCent;
-       double_t* rp_xCent;
-	   float det_tilt = 0.047; 
+	  if (IP_design == "IP6") {
 
-       rp_zCent = new double_t[rpDetNr]{2600, 2800};
-       rp_xCent = new double_t[rpDetNr]{-83.22, -92.20};
-   	   det_tilt = 0.047;
+         	const int rpDetNr = 2;
+         	double_t* rp_zCent;
+         	double_t* rp_xCent;  
+         	rp_zCent = new double_t[rpDetNr]{2600, 2800};
+         	rp_xCent = new double_t[rpDetNr]{-83.22, -92.20};
 
-	   float det_rot = atan( rp_xCent[0] / rp_zCent[0]); 
-	  
-	   if (hit_iter->second->get_z(0) < rp_zCent[0]+50 && hit_iter->second->get_z(0) >rp_zCent[0]-50 ) {
+	 	float local_x;
+	 	float local_y;
+
+	 	if (hit_iter->second->get_z(0) < rp_zCent[0]+50 && hit_iter->second->get_z(0) >rp_zCent[0]-50 ) {
 
 		h2_RP_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
 
-//		float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), 0.047, -0.025) ;
-
-//		float local_y = Get_Local_Y(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), 0.047, -0.025) ;
-
-		/// -0.03199676847625228 
-
-		float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
-
-		float local_y = Get_Local_Y(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
-               
-
-//		cout << det_tilt << endl;
-
-		h2_RP_XY_l->Fill(local_x, local_y);
-
-//		cout << hit_iter->second->get_x(0) << "   "  << hit_iter->second->get_y(0) << endl;
-//		cout << "local " << local_x << "   "  << local_y << endl;
 
 
+	  	   float det_rot = atan( rp_xCent[0] / rp_zCent[0]); 
+        	   float det_tilt = 0.047; 
 
-		//---------------------------------------------
-		// Standarized Roman pot cut
-		//
-		if (local_x > -5. && local_x < 5. && local_y > -1.0 && local_y < 1.0)  {
+		   local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
+		   local_y = Get_Local_Y(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
 
-			//// This is beam contribution here
+                   h2_RP_XY_l->Fill(local_x, local_y); 
+
+
+		   //---------------------------------------------
+		   // Standarized Roman pot cut
+		   //
+		   if (local_x > -5. && local_x < 5. && local_y > -1.0 && local_y < 1.0)  {
+
+		   	//// This is beam contribution here
+
+		   } else {
+
+		   	////This is where you signal is!
+		   	//
+
+		        if (local_x > -12.5 && local_x < 12.5 && local_y > -5.0 && local_y < 5.0) {
+
+
+		   	h2_RP_XY_signal->Fill(local_x, local_y);
+
+		        } 
+
+		   }
+
+		  } 
 
 		} else {
 
-			////This is where you signal is!
-			//
+		h2_RP_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
 
-		     if (local_x > -12.5 && local_x < 12.5 && local_y > -5.0 && local_y < 5.0) {
+//                float det_xCent = Enclosure_params.get_double_param("place_x") + ZDC_params.get_double_param("place_x");
+//                float det_zCent = Enclosure_params.get_double_param("place_z") + ZDC_params.get_double_param("place_z");
+//                float det_tilt = ZDC_params.get_double_param("rot_y")/180. * TMath::Pi(); // in Rad
+//
+//                float det_rot = atan( det_xCent / det_zCent);  // in Rad
+//                float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
+//                float local_y = Get_Local_Y(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
+//
+//
+//
+//                  rp_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_rpTruth");
+//		  zdc_nodeparams->print();
+//
+//		  rp_nodeparams->print();
 
+                  float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), rp_nodeparams);
+                  float local_y = hit_iter->second->get_y(0);
 
-			h2_RP_XY_signal->Fill(local_x, local_y);
+//		  cout << local_x << endl;
 
+                  h2_RP_XY_l->Fill(local_x, local_y); 
 
-		     } 
+		}
 
-		} 
-
-	    }
 
 	 }
 
@@ -869,15 +974,30 @@ int diff_tagg_ana::process_g4clusters(PHCompositeNode* topNode, const string& de
 
 float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z, float det_tilt, float det_rot) {
 
-	
    TVector3 global_cor(global_x, global_y, global_z);
+   float local_x;
 
-   global_cor.RotateY(-det_rot);
-//   global_cor.RotateY(det_tilt);
+//   if (IP_design == "IP6") {
+    
+       global_cor.RotateY(-det_rot);
+    //   global_cor.RotateY(det_tilt);
+    
+       local_x = global_cor.X()/cos(det_tilt);
+    //   float local_x = global_cor.X();
+    //   cout << global_x << "    " << global_cor.X()<< "   " << local_x << endl;
 
-   float local_x = global_cor.X()/cos(det_tilt);
-//   float local_x = global_cor.X();
-//   cout << global_x << "    " << global_cor.X()<< "   " << local_x << endl;
+//   } else {
+//
+//       cout << "IP8" << "    "  << det_rot << endl;
+//       
+//       global_cor.RotateY(-0.035);
+//    //   global_cor.RotateY(det_tilt);
+//    
+////       local_x = global_cor.X()/cos(det_tilt);
+//       local_x = global_cor.X();
+//    //   cout << global_x << "    " << global_cor.X()<< "   " << local_x << endl;
+//
+//   }
 	
    return local_x;
 
@@ -891,4 +1011,63 @@ float diff_tagg_ana::Get_Local_Y(float global_x, float global_y, float global_z,
 	return global_y;
 
 }
+
+
+
+
+
+//*******************************************
+
+float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z, PdbParameterMapContainer *det_nodeparams) {
+
+   PHParameters Det_params{"PHDet"};
+
+ //  det_nodeparams->print();
+
+   if (det_nodeparams)
+   {
+      Det_params.FillFrom(det_nodeparams, 0);
+   } else {
+      cerr << "There is a issue finding the detector paramter node!" << endl;
+   }
+
+   float det_xCent = Enclosure_params.get_double_param("place_x") + Det_params.get_double_param("place_x");
+   float det_zCent = Enclosure_params.get_double_param("place_z") + Det_params.get_double_param("place_z");
+   float det_tilt = Det_params.get_double_param("rot_y")/180. * TMath::Pi(); // in Rad
+
+   float det_rot = atan( det_xCent / det_zCent);  // in Rad
+
+   TVector3 global_cor(global_x, global_y, global_z);
+   float local_x;
+
+//   if (IP_design == "IP6") {
+    
+       global_cor.RotateY(-det_rot);
+    //   global_cor.RotateY(det_tilt);
+    
+       local_x = global_cor.X()/cos(det_tilt);
+    //   float local_x = global_cor.X();
+    //   cout << global_x << "    " << global_cor.X()<< "   " << local_x << endl;
+
+//   } else {
+//
+//       cout << "IP8" << "    "  << det_rot << endl;
+//       
+//       global_cor.RotateY(-0.035);
+//    //   global_cor.RotateY(det_tilt);
+//    
+////       local_x = global_cor.X()/cos(det_tilt);
+//       local_x = global_cor.X();
+//    //   cout << global_x << "    " << global_cor.X()<< "   " << local_x << endl;
+//
+//   }
+
+//   cout << "local: "<< local_x << endl;
+
+//   exit(0);
+	
+   return local_x;
+
+}
+
 
