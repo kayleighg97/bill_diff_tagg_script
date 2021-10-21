@@ -112,7 +112,7 @@ class diff_tagg_ana : public SubsysReco
   float Get_Local_Y(float global_x, float global_y, float global_z, float det_tilt, float det_rot);
   float Get_Local_X(float global_x, float global_y, float global_z, PdbParameterMapContainer *det_nodeparams);
 //  float Get_Local_X(float global_x, float global_y, float global_z) {return 1;};
-
+  float Get_Local_X(float global_x, float global_y, float global_z, PHParameters Det_params);
   //---------------------
   // From ejana
 
@@ -132,6 +132,8 @@ class diff_tagg_ana : public SubsysReco
   double ion_beam_energy;
 
   double crossing_angle;
+
+  int b0DetNr;
 
   TLorentzVector r_lelectron;
 //  TLorentzVector r_lproton;
@@ -160,6 +162,7 @@ class diff_tagg_ana : public SubsysReco
 
   // B0
   TH2F* h2_B0_XY_g; 
+  TH2F* h2_B0_XY_l; 
 
   //-------------------------------
   int m_mpi;
@@ -180,17 +183,16 @@ class diff_tagg_ana : public SubsysReco
   PHParameters RP_1_params{"PHG4RP"};
   PHParameters RP2_params{"PHG4RP2"};
   PHParameters B0_params{"PHG4B0"};
+  PHParameters BeamLineMagnet_params{"PHG4BeamLinMagnet"};
 
   PdbParameterMapContainer *encloseure_nodeparams; 
   PdbParameterMapContainer *zdc_nodeparams; 
   PdbParameterMapContainer *rp_nodeparams;
   PdbParameterMapContainer *rp2_nodeparams;
   PdbParameterMapContainer *b0_nodeparams;
+  PdbParameterMapContainer *beamlinemagnet_nodeparams; 
 
   TString IP_design;
-
-  
-
 
 };
 
