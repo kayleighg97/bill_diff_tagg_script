@@ -852,17 +852,31 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 	       cerr << "There is a issue finding the detector paramter node!" << endl;
 	    }
 
+	   //******************************
+	   /// Converting to the global coordinate, where the forward vacuum encloseure must be taken into account  
+
 	   float det_x_pos = Enclosure_params.get_double_param("place_x")  + RP_1_params.get_double_param("place_x");
 	   float det_z_pos = Enclosure_params.get_double_param("place_z")  + RP_1_params.get_double_param("place_z");
 
 	   RP_1_params.set_double_param("place_x", det_x_pos); 
 	   RP_1_params.set_double_param("place_z", det_z_pos); 
 
+	   //******************************
+	   /// Converting to the degree to radian. This is due to the fact that RP tilt was defined in degrees instead of Rad. 
+	   /// Note that the RP is the only detector having this issue.
+	   /// To minimize future confusion and an additional check is in place to make sure RP tile in rad is less than 1.5.
+	   /// If it is larger, than it have to be in degrees
+
+	   if (RP_1_params.get_double_param("rot_y") > 1.5) {
+	  	float deg_to_rad = RP_1_params.get_double_param("rot_y") * TMath::Pi() / 180.;
+	   	RP_1_params.set_double_param("rot_y", deg_to_rad); 
+	   }
 
 	   float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), RP_1_params);
            float local_y = hit_iter->second->get_y(0);
 
-//	   cout << local_x << endl;
+//	   cout << local_x << "    " << RP_1_params.get_double_param("rot_y") << "    "  << RP_1_params.get_double_param("rot_y")*TMath::Pi()/180 << endl;
+//	   exit(0);
 
            h2_RP_XY_l->Fill(local_x, local_y);
 
@@ -1140,10 +1154,6 @@ float diff_tagg_ana::Get_Local_Y(float global_x, float global_y, float global_z,
 
 }
 
-
-
-
-
 //*******************************************
 
 float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z, PdbParameterMapContainer *det_nodeparams) {
@@ -1194,6 +1204,14 @@ float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z,
 
 //   exit(0);
 	
+
+//   float local_x1 = Get_Local_X(global_x, global_y, global_z, det_tilt, det_rot);
+//
+//
+//   cout << local_x1 << "    "<< local_x << endl;
+//
+//   exit(0);
+
    return local_x;
 
 }
@@ -1210,13 +1228,17 @@ float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z,
    float det_rot = atan( det_xCent / det_zCent);  // in Rad
 
    TVector3 global_cor(global_x, global_y, global_z);
-   float local_x;
 
-   global_cor.RotateY(-det_rot);
+//   float local_x;
+//   global_cor.RotateY(-det_rot);
+//   local_x = global_cor.X()/cos(det_tilt);
 
-   local_x = global_cor.X()/cos(det_tilt);
-	
-   return local_x;
+
+   float local_x1 = Get_Local_X(global_x, global_y, global_z, det_tilt, det_rot);
+//   cout << local_x1 << "    "<< local_x << endl;
+//   exit(0);
+
+   return local_x1;
 
 }
 
