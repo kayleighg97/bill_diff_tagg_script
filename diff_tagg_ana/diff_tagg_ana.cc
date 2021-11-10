@@ -628,7 +628,7 @@ int diff_tagg_ana::process_g4hits_ZDC(PHCompositeNode* topNode)
 
       h2_ZDC_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0)); 
 //
-      smeared_E = EMCAL_Smear(hit_iter->second->get_edep());
+      smeared_E = ZDC_Energy_Smear_EMCAL(hit_iter->second->get_edep());
 //
       if (ZDC_hit == 2 ) {
 
@@ -992,22 +992,12 @@ int diff_tagg_ana::process_g4hits_B0(PHCompositeNode* topNode)
 
 }
 
+///*****************************************************
+/// ZDC Energy and Poisition smearing functions
+//
+// Energy smearing
 
-
-
-
-
-
-
-
-
-
-
-
-
-//*****************************************************
-
-float diff_tagg_ana::EMCAL_Smear(float E) {
+float diff_tagg_ana::ZDC_Energy_Smear_EMCAL(float E) {
 
   float resolution, E_reco;
 
@@ -1017,10 +1007,9 @@ float diff_tagg_ana::EMCAL_Smear(float E) {
   return E_reco;
 }
 
+// Energy smearing
 
-//*****************************************************
-
-float diff_tagg_ana::HCAL_Smear(float E) {
+float diff_tagg_ana::ZDC_Energy_Smear_HCAL(float E) {
 
   float resolution, E_reco;
 
@@ -1030,9 +1019,9 @@ float diff_tagg_ana::HCAL_Smear(float E) {
   return E_reco;
 }
 
-//*****************************************************
+// Energy smearing
 
-float diff_tagg_ana::PbWO4_Smear(float E) {
+float diff_tagg_ana::ZDC_Energy_Smear_PbWO4(float E) {
 
   float resolution, E_reco;
 
@@ -1043,9 +1032,9 @@ float diff_tagg_ana::PbWO4_Smear(float E) {
 
 }
 
-//*****************************************************
+// Posision smearing
 
-float diff_tagg_ana::Position_Smear(float P) {
+float diff_tagg_ana::ZDC_Position_Smear(float P) {
 
   float resolution, P_reco;
 
@@ -1055,6 +1044,131 @@ float diff_tagg_ana::Position_Smear(float P) {
   return P_reco;
 
 }
+
+///*****************************************************
+/// B0 tracker smearing functions
+
+// Energy smearing
+
+float diff_tagg_ana::B0Tracker_Energy_Smear(float E) {
+
+  float resolution, E_reco;
+
+  resolution = sqrt(.25*.25/E + 0.04*0.04);
+  E_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * E;
+
+  return E_reco;
+
+}
+
+// Posision smearing
+
+float diff_tagg_ana::B0Tracker_Position_Smear(float P) {
+
+  float resolution, P_reco;
+
+  resolution = 0.1;         /// Position resolution 0.1 cm
+  P_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * P;
+
+  return P_reco;
+
+}
+
+
+///*****************************************************
+/// B0 Cal smearing functions
+
+// Energy smearing
+
+float diff_tagg_ana::B0Cal_Energy_Smear(float E) {
+
+  float resolution, E_reco;
+
+  resolution = sqrt(.25*.25/E + 0.04*0.04);
+  E_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * E;
+
+  return E_reco;
+
+}
+
+// Posision smearing
+
+float diff_tagg_ana::B0Cal_Position_Smear(float P) {
+
+  float resolution, P_reco;
+
+  resolution = 0.1;         /// Position resolution 0.1 cm
+  P_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * P;
+
+  return P_reco;
+
+}
+
+///*****************************************************
+/// RP smearing functions
+
+float diff_tagg_ana::RP_Energy_Smear(float E) {
+
+  float resolution, E_reco;
+
+  resolution = sqrt(.25*.25/E + 0.04*0.04);
+  E_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * E;
+
+  return E_reco;
+
+}
+
+// Posision smearing
+
+float diff_tagg_ana::RP_Position_Smear(float P) {
+
+  float resolution, P_reco;
+
+  resolution = 0.1;         /// Position resolution 0.1 cm
+  P_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * P;
+
+  return P_reco;
+
+}
+
+///*****************************************************
+/// Off momentum smearing functions
+
+float diff_tagg_ana::Off_Mom_Energy_Smear(float E) {
+
+  float resolution, E_reco;
+
+  resolution = sqrt(.25*.25/E + 0.04*0.04);
+  E_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * E;
+
+  return E_reco;
+
+}
+
+// Posision smearing
+
+float diff_tagg_ana::Off_Mom_Position_Smear(float P) {
+
+  float resolution, P_reco;
+
+  resolution = 0.1;         /// Position resolution 0.1 cm
+  P_reco = (1+ gsl_ran_gaussian(m_RandomGenerator, resolution)) * P;
+
+  return P_reco;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1119,27 +1233,8 @@ float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z,
    TVector3 global_cor(global_x, global_y, global_z);
    float local_x;
 
-//   if (IP_design == "IP6") {
-    
-       global_cor.RotateY(-det_rot);
-    //   global_cor.RotateY(det_tilt);
-    
-       local_x = global_cor.X()/cos(det_tilt);
-    //   float local_x = global_cor.X();
-    //   cout << global_x << "    " << global_cor.X()<< "   " << local_x << endl;
-
-//   } else {
-//
-//       cout << "IP8" << "    "  << det_rot << endl;
-//       
-//       global_cor.RotateY(-0.035);
-//    //   global_cor.RotateY(det_tilt);
-//    
-////       local_x = global_cor.X()/cos(det_tilt);
-//       local_x = global_cor.X();
-//    //   cout << global_x << "    " << global_cor.X()<< "   " << local_x << endl;
-//
-//   }
+   global_cor.RotateY(-det_rot);
+   local_x = global_cor.X()/cos(det_tilt - det_rot);
 	
    return local_x;
 

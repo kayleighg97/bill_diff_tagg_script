@@ -96,14 +96,37 @@ class diff_tagg_ana : public SubsysReco
 
   int static_event_counter;
 
+  //*********************************
+  // ZDC Energy and Position smearing
+
+  float ZDC_Energy_Smear_EMCAL(float E);
+  float ZDC_Energy_Smear_HCAL(float E);
+  float ZDC_Energy_Smear_PbWO4(float E);
+  float ZDC_Position_Smear(float E);
 
   //*********************************
-  // Energy and Position smearing
+  // B0 Tracker Energy and Position smearing
 
-  float EMCAL_Smear(float E);
-  float HCAL_Smear(float E);
-  float PbWO4_Smear(float E);
-  float Position_Smear(float E);
+  float B0Tracker_Energy_Smear(float E);
+  float B0Tracker_Position_Smear(float E);
+
+  //*********************************
+  // B0 Cal Energy and Position smearing
+
+  float B0Cal_Energy_Smear(float E);
+  float B0Cal_Position_Smear(float E);
+
+  //*********************************
+  // RP Energy and Position smearing
+
+  float RP_Energy_Smear(float E);
+  float RP_Position_Smear(float E);
+
+  //*********************************
+  // Off Momentum Energy and Position smearing
+
+  float Off_Mom_Energy_Smear(float E);
+  float Off_Mom_Position_Smear(float E);
 
   //*********************************
   // Coordinate transformation from global to local
