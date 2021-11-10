@@ -1300,8 +1300,7 @@ float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z,
 //   exit(0);
 	
 
-//   float local_x1 = Get_Local_X(global_x, global_y, global_z, det_tilt, det_rot);
-//
+//   float local_x1 = Get_Local_X(global_x, global_y, global_z, det_tilt, det_rot); //
 //
 //   cout << local_x1 << "    "<< local_x << endl;
 //
@@ -1318,7 +1317,8 @@ float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z,
    float det_xCent = Det_params.get_double_param("place_x");
    float det_zCent = Det_params.get_double_param("place_z");
 
-   float det_tilt = Det_params.get_double_param("rot_y")/180. * TMath::Pi(); // in Rad
+//   float det_tilt = Det_params.get_double_param("rot_y")/180. * TMath::Pi(); // in Rad
+   float det_tilt = Det_params.get_double_param("rot_y"); // in Rad
 
    float det_rot = atan( det_xCent / det_zCent);  // in Rad
 
