@@ -223,8 +223,10 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   h2_pos_mom = new TH2F("h2_pos_mom", "h2_pos_mom", 200, -80, -20, 200, 0, 0.00005); 
   h2_Q2_theta = new TH2F("h2_Q2_truth_theta", "h_Q2_truth_theta", 200, 0, 3.14, 200, 0, 0.00005); 
 
-  gDirectory->cd("/");
+  h_log_Q2 = new TH1F("h2_log_Q2", "h2_log_Q2", 200, -10, 0); 
+  h_log_Q2_LowQ2tag = new TH1F("h2_log_Q2_LowQ2tag", "h2_log_LowQ2tag", 200, -10, 0); 
 
+  gDirectory->cd("/");
 
   //**************
   // B0
@@ -236,8 +238,6 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   h2_B0_XY_l = new TH2F("B0_XY_local", "B0_XY_local", 50, -25, 25, 50, -25, 25); 
 
   gDirectory->cd("/");
-
-
 
   //***********************8
 
@@ -1077,9 +1077,12 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
         Q2_truth = -1*(virtphoton4VectTruth.Mag2());
   
 	h_Q2_truth->Fill(Q2_truth);
+	h_log_Q2->Fill(log10(Q2_truth));
 
 
 //        cout  << "Q2: "<<  Q2_truth << endl;
+//
+	
   
       }
    
@@ -1136,6 +1139,8 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 	h2_Q2_theta->Fill(theta, Q2_truth);
 
 	h_Q2_truth_LowQ2tag->Fill(Q2_truth);
+
+	h_log_Q2_LowQ2tag->Fill(log10(Q2_truth));
 
 //	cout << hit_iter->second->get_edep() << endl;
 	h2_Q2_truth_E->Fill(Q2_truth,  g4particle_hit->get_e());
