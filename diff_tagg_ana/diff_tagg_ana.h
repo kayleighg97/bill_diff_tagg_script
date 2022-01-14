@@ -72,12 +72,18 @@ class diff_tagg_ana : public SubsysReco
   int process_g4hits_RomanPots(PHCompositeNode *);
   int process_g4hits_B0(PHCompositeNode *);
 
+  int process_g4hits_LowQ2Tagger(PHCompositeNode *);
+
 
   int process_g4hits(PHCompositeNode *, const std::string&);
   int process_g4clusters(PHCompositeNode *, const std::string&);
 
   int process_PHG4Truth(PHCompositeNode* topNode);
   int process_PHG4Truth_Primary_Particles(PHCompositeNode* topNode);
+
+
+
+
 
 // private:
 
@@ -151,10 +157,9 @@ class diff_tagg_ana : public SubsysReco
   bool  HIT_IN_ZDC; 
   bool  HIT_IN_HEC;	
 
-  double e_beam_energy;
-  double ion_beam_energy;
-
-  double crossing_angle;
+//  double e_beam_energy;
+//  double ion_beam_energy;
+//  double crossing_angle;
 
   int b0DetNr;
 
@@ -186,6 +191,36 @@ class diff_tagg_ana : public SubsysReco
   // B0
   TH2F* h2_B0_XY_g; 
   TH2F* h2_B0_XY_l; 
+
+  // Low Q2 Tagger
+  TH2F* h2_lowQ2_XY; 
+  TH1F* h_Q2_truth; 
+  TH1F* h_Q2_truth_LowQ2tag; 
+  TH2F* h2_Q2_pos; 
+  TH2F* h2_Q2_mom; 
+  TH2F* h2_pos_mom; 
+  TH2F* h2_Q2_theta; 
+
+  TH2F* h2_Q2_truth_E; 
+
+  // Beam parameter
+
+  Float_t e_beam_energy;
+  Float_t e_beam_pmag;
+
+  Float_t ion_beam_energy;
+  Float_t ion_beam_pmag;
+
+  Float_t crossing_angle;
+
+  Float_t Q2_truth;
+  Float_t mProt;
+  Float_t mElec;
+
+  TLorentzVector eBeam4Vect;
+  TLorentzVector pBeam4Vect;
+  TLorentzVector virtphoton4VectTruth;
+  TLorentzVector e4VectTruth;
 
   //-------------------------------
   int m_mpi;
