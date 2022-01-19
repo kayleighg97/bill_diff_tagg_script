@@ -264,10 +264,6 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
 
   h2_E_Q2 = new TH2F("h2_E_Q2", "h2_E_Q2", 100, 0, 20, nbins, xbins);
   h2_E_Q2_LowQ2tag = new TH2F("h2_E_Q2_LowQ2tag", "h2_E_Q2_LowQ2tag", 100, 0, 20,  nbins, xbins); 
-
-  h_log_Q2 = new TH1F("h_log_Q2", "h2_log_Q2", nbins, xbins); 
-  h_log_Q2_LowQ2tag = new TH1F("h_log_Q2_LowQ2tag", "h2_log_LowQ2tag",  nbins, xbins); 
-
  
 
   gDirectory->cd("/");
@@ -1123,7 +1119,7 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 	h_Q2_truth->Fill(Q2_truth);
 	h_Q2->Fill(Q2_truth);
 
-	h_log_Q2->Fill(log10(Q2_truth));
+	h_log_Q2->Fill(Q2_truth);
 
 
 
@@ -1137,7 +1133,7 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 	h_E->Fill(e_E_truth);
 	h_eta->Fill(e_eta_truth);
         h_polar->Fill(e_Polar_truth);
-	h2_E_Q2->Fill(e_E_truth, log10(Q2_truth));
+	h2_E_Q2->Fill(e_E_truth, Q2_truth);
 
 
 
@@ -1201,7 +1197,7 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 
 	h_Q2_truth_LowQ2tag->Fill(Q2_truth);
 
-	h_log_Q2_LowQ2tag->Fill(log10(Q2_truth));
+	h_log_Q2_LowQ2tag->Fill(Q2_truth);
 
 //	cout << hit_iter->second->get_edep() << endl;
 	h2_Q2_truth_E->Fill(Q2_truth,  g4particle_hit->get_e());
@@ -1215,7 +1211,7 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 	h_E_LowQ2tag->Fill(e_E_truth);
 	h_eta_LowQ2tag->Fill(e_eta_truth);
         h_polar_LowQ2tag->Fill(e_Polar_truth);
-	h2_E_Q2_LowQ2tag->Fill(e_E_truth, log10(Q2_truth));
+	h2_E_Q2_LowQ2tag->Fill(e_E_truth, Q2_truth);
 
 //	cout << r << "  "<< Q2_truth << endl;
 
