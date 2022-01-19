@@ -206,6 +206,19 @@ class diff_tagg_ana : public SubsysReco
   TH1F* h_log_Q2; 
   TH1F* h_log_Q2_LowQ2tag;
 
+  TH1F* h_E;
+  TH1F* h_E_LowQ2tag;
+
+  TH1F* h_eta;
+  TH1F* h_eta_LowQ2tag;
+
+  TH1F* h_polar;
+  TH1F* h_polar_LowQ2tag; 
+
+  TH2F* h2_E_Q2;
+  TH2F* h2_E_Q2_LowQ2tag;
+
+
   // Beam parameter
 
   Float_t e_beam_energy;
@@ -217,6 +230,11 @@ class diff_tagg_ana : public SubsysReco
   Float_t crossing_angle;
 
   Float_t Q2_truth;
+  Float_t e_eta_truth;
+  Float_t e_Phi_truth;
+  Float_t e_E_truth;
+
+
   Float_t mProt;
   Float_t mElec;
 
