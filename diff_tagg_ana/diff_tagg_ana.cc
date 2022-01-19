@@ -221,7 +221,7 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
 
   h2_Q2_truth_E = new TH2F("h2_Q2_truth_E", "h2_Q2_truth_E", 200, 0, 5, 200, 0, 18); 
   h2_pos_mom = new TH2F("h2_pos_mom", "h2_pos_mom", 200, -80, -20, 200, 0, 0.00005); 
-  h2_Q2_theta = new TH2F("h2_Q2_truth_theta", "h_Q2_truth_theta", 200, 0, 3.14, 200, 0, 0.00005); 
+//  h2_Q2_theta = new TH2F("h2_Q2_truth_theta", "h_Q2_truth_theta", 200, 0, 3.14, 200, 0, 0.00005); 
 
   
   // ----------------------------------
@@ -1127,7 +1127,7 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 	e_eta_truth = e4VectTruth.Eta();
         e_Phi_truth = e4VectTruth.Phi();
 
-	e_Polar_truth = TMath::Pi() - e4VectTruth.Theta();
+	e_Polar_truth = (TMath::Pi() - e4VectTruth.Theta()) * 1000.;
 
 
 	h_E->Fill(e_E_truth);
@@ -1193,7 +1193,7 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 
 	h2_lowQ2_XY->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
 
-	h2_Q2_theta->Fill(theta, Q2_truth);
+//	h2_Q2_theta->Fill(theta, Q2_truth);
 
 	h_Q2_truth_LowQ2tag->Fill(Q2_truth);
 
