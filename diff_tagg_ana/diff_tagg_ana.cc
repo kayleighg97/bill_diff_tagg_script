@@ -214,7 +214,7 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   gDirectory->cd("LowQ2");
 
   h2_lowQ2_XY = new TH2F("h2_lowQ2_XY", "h2_lowQ2_XY", 200, -80, -20, 200, -20, 20); 
-  h_Q2_truth = new TH1F("h_Q2_truth", "h_Q2_truth", 200, 0, 5); 
+  h_Q2_truth = new TH1F("h_Q2_truth", "h_Q2_truth", 200, 1e-9, 1); 
   h_Q2_truth_LowQ2tag = new TH1F("h_Q2_truth_LowQ2tag", "h_Q2_truth_LowQ2tag", 200, 0, 5); 
   h2_Q2_pos = new TH2F("h2_Q2_truth_pos", "h_Q2_truth_pos", 200, -80, -20, 200, 0, 5); 
 //  h2_Q2_pos = new TH2F("h2_Q2_truth_pos", "h_Q2_truth_pos", 20, 0, 100, 20, 0, 5); 
@@ -227,20 +227,48 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   // ----------------------------------
   // Low Q2 tagger
 
-  h_log_Q2 = new TH1F("h_log_Q2", "h2_log_Q2", 200, -10, 0); 
-  h_log_Q2_LowQ2tag = new TH1F("h_log_Q2_LowQ2tag", "h2_log_LowQ2tag", 200, -10, 0); 
+
+   const Int_t nbins = 150;
+   Double_t xmin = 1e-9;
+   Double_t xmax = 1e0;
+   Double_t logxmin = log10(xmin);
+   Double_t logxmax = log10(xmax);
+   Double_t binwidth = (logxmax-logxmin)/nbins;
+   Double_t xbins[nbins+1];
+   xbins[0] = xmin;
+   for (Int_t i=1;i<=nbins;i++) {
+      xbins[i] = xmin + TMath::Power(10,logxmin+i*binwidth);
+   }
+ 
+//   TH1F *h = new TH1F("h","hist with log x axis",nbins,xbins);
+ 
+  h_Q2 = new TH1F("h_Q2", "h2_Q2", nbins, xbins); 
+
+
+//  h_log_Q2 = new TH1F("h_log_Q2", "h2_log_Q2", 200, -10, 0); 
+//  h_log_Q2_LowQ2tag = new TH1F("h_log_Q2_LowQ2tag", "h2_log_LowQ2tag", 200, -10, 0); 
+
+
+
+  h_log_Q2 = new TH1F("h_log_Q2", "h2_log_Q2", nbins, xbins); 
+  h_log_Q2_LowQ2tag = new TH1F("h_log_Q2_LowQ2tag", "h2_log_LowQ2tag", nbins, xbins); 
 
   h_E = new TH1F("h_E", "h_E", 200, 0, 20); 
   h_E_LowQ2tag = new TH1F("h_E_LowQ2tag", "h_E_LowQ2tag", 200, 0, 20); 
 
-  h_eta = new TH1F("h_eta_Q2", "h_eta_Q2", 200, -14, -4); 
+  h_eta = new TH1F("h_eta", "h_eta", 200, -14, -4); 
   h_eta_LowQ2tag = new TH1F("h_eta_LowQ2tag", "h_eta_LowQ2tag", 200, -14, -4); 
 
-  h_polar = new TH1F("h_polar_Q2", "h_polar_Q2", 100, 0, 15); 
+  h_polar = new TH1F("h_polar", "h_polar", 100, 0, 15); 
   h_polar_LowQ2tag = new TH1F("h_polar_LowQ2tag", "h_polar_LowQ2tag", 100, 0, 15); 
 
-  h2_E_Q2 = new TH2F("h2_E_Q2", "h2_E_Q2", 100, 0, 20, 100, -10, 0); 
-  h2_E_Q2_LowQ2tag = new TH2F("h2_E_Q2_LowQ2tag", "h2_E_Q2_LowQ2tag", 100, 0, 20, 100, -10, 0); 
+  h2_E_Q2 = new TH2F("h2_E_Q2", "h2_E_Q2", 100, 0, 20, nbins, xbins);
+  h2_E_Q2_LowQ2tag = new TH2F("h2_E_Q2_LowQ2tag", "h2_E_Q2_LowQ2tag", 100, 0, 20,  nbins, xbins); 
+
+  h_log_Q2 = new TH1F("h_log_Q2", "h2_log_Q2", nbins, xbins); 
+  h_log_Q2_LowQ2tag = new TH1F("h_log_Q2_LowQ2tag", "h2_log_LowQ2tag",  nbins, xbins); 
+
+ 
 
   gDirectory->cd("/");
 
@@ -1093,6 +1121,8 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
         Q2_truth = -1*(virtphoton4VectTruth.Mag2());
   
 	h_Q2_truth->Fill(Q2_truth);
+	h_Q2->Fill(Q2_truth);
+
 	h_log_Q2->Fill(log10(Q2_truth));
 
 
@@ -1101,10 +1131,12 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 	e_eta_truth = e4VectTruth.Eta();
         e_Phi_truth = e4VectTruth.Phi();
 
+	e_Polar_truth = TMath::Pi() - e4VectTruth.Theta();
+
 
 	h_E->Fill(e_E_truth);
 	h_eta->Fill(e_eta_truth);
-        h_polar->Fill(e_Phi_truth);
+        h_polar->Fill(e_Polar_truth);
 	h2_E_Q2->Fill(e_E_truth, log10(Q2_truth));
 
 
@@ -1182,7 +1214,7 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 
 	h_E_LowQ2tag->Fill(e_E_truth);
 	h_eta_LowQ2tag->Fill(e_eta_truth);
-        h_polar_LowQ2tag->Fill(e_Phi_truth);
+        h_polar_LowQ2tag->Fill(e_Polar_truth);
 	h2_E_Q2_LowQ2tag->Fill(e_E_truth, log10(Q2_truth));
 
 //	cout << r << "  "<< Q2_truth << endl;

@@ -203,6 +203,7 @@ class diff_tagg_ana : public SubsysReco
 
   TH2F* h2_Q2_truth_E; 
 
+  TH1F* h_Q2; 
   TH1F* h_log_Q2; 
   TH1F* h_log_Q2_LowQ2tag;
 
@@ -233,6 +234,7 @@ class diff_tagg_ana : public SubsysReco
   Float_t e_eta_truth;
   Float_t e_Phi_truth;
   Float_t e_E_truth;
+  Float_t e_Polar_truth;
 
 
   Float_t mProt;
