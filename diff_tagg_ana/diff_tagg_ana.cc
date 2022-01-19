@@ -1189,7 +1189,7 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 	cout << theta << endl;
 
 
-	if (Q2_truth < 0.1 && eta < -4.5 && e_E_truth < 17.7) {
+	if (Q2_truth < 0.1 && e_eta_truth < -4.5 && e_E_truth < 17.7) {
 
 //	h_Q2_truth->Fill(Q2_truth);
 	h2_Q2_pos->Fill(hit_iter->second->get_x(0), Q2_truth);
