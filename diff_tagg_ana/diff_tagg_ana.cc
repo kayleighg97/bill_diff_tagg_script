@@ -239,8 +239,8 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   h_polar = new TH1F("h_polar_Q2", "h_polar_Q2", 100, 0, 15); 
   h_polar_LowQ2tag = new TH1F("h_polar_LowQ2tag", "h_polar_LowQ2tag", 100, 0, 15); 
 
-  h2_E_Q2 = new TH2F("h2_E_Q2", "h2_E_Q2", 200, 0, 20, 200, -10, 0); 
-  h2_E_Q2_LowQ2tag = new TH2F("h2_E_Q2_LowQ2tag", "h2_E_Q2_LowQ2tag", 200, 0, 20, 200, 1e-9, 1); 
+  h2_E_Q2 = new TH2F("h2_E_Q2", "h2_E_Q2", 100, 0, 20, 100, -10, 0); 
+  h2_E_Q2_LowQ2tag = new TH2F("h2_E_Q2_LowQ2tag", "h2_E_Q2_LowQ2tag", 100, 0, 20, 100, -10, 0); 
 
   gDirectory->cd("/");
 
