@@ -253,8 +253,8 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   h_log_Q2 = new TH1F("h_log_Q2", "h2_log_Q2", nbins, xbins); 
   h_log_Q2_LowQ2tag = new TH1F("h_log_Q2_LowQ2tag", "h2_log_LowQ2tag", nbins, xbins); 
 
-  h_E = new TH1F("h_E", "h_E", 200, 0, 20); 
-  h_E_LowQ2tag = new TH1F("h_E_LowQ2tag", "h_E_LowQ2tag", 200, 0, 20); 
+  h_E = new TH1F("h_E", "h_E", 200, 4, 24); 
+  h_E_LowQ2tag = new TH1F("h_E_LowQ2tag", "h_E_LowQ2tag", 200, 4, 24); 
 
   h_eta = new TH1F("h_eta", "h_eta", 200, -14, -4); 
   h_eta_LowQ2tag = new TH1F("h_eta_LowQ2tag", "h_eta_LowQ2tag", 200, -14, -4); 
@@ -1188,6 +1188,9 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 
 	cout << theta << endl;
 
+
+	if (Q2_truth < 0.1 && eta < -4.5 && e_E_truth < 17.7) {
+
 //	h_Q2_truth->Fill(Q2_truth);
 	h2_Q2_pos->Fill(hit_iter->second->get_x(0), Q2_truth);
 
@@ -1216,6 +1219,9 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 //	cout << r << "  "<< Q2_truth << endl;
 
 //	exit(0);
+
+	}
+
 
     }
   
