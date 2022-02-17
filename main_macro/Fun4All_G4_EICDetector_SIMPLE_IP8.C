@@ -129,12 +129,12 @@ int Fun4All_G4_EICDetector(
   //   Input::SARTRE = true;
 
   // Simple multi particle generator in eta/phi/pt ranges
-  // Input::SIMPLE = true;
+  Input::SIMPLE = true;
   // Input::SIMPLE_NUMBER = 2; // if you need 2 of them
   // Input::SIMPLE_VERBOSITY = 1;
 
   // Particle gun (same particles in always the same direction)
-  Input::GUN = true;
+  // Input::GUN = true;
   // Input::GUN_NUMBER = 3; // if you need 3 of them
   // Input::GUN_VERBOSITY = 0;
 
