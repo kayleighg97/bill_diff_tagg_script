@@ -593,8 +593,8 @@ int diff_tagg_ana::process_PHG4Truth_Primary_Particles(PHCompositeNode* topNode)
 
 	m_truthpid = m_truthpid;
 
-//    cout << "truth: " << m_truthpid << "  " << m_truthpx << "  " << m_truthpy 
-//         << "  " << m_truthpz << endl;
+    cout << setprecision(10) << "truth: " << m_truthpid << "  " << m_truthpx << "  " << m_truthpy 
+         << "  " << m_truthpz << endl;
 
     /// Fill the g4 truth tree
 //    m_truthtree->Fill();
