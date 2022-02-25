@@ -97,6 +97,7 @@
 #include <iostream>
 
 #include <gsl/gsl_randist.h>
+
 #include <gsl/gsl_rng.h>
 
 /// HEPMC truth includes
@@ -186,7 +187,7 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   h2_ZDC_XY_l = new TH2F("ZDC_XY_l", "ZDC XY_l", 200, -50, 50, 200, -50, 50);
   h2_ZDC_XY_l_double = new TH2F("ZDC_XY_l_double", "ZDC XY Double gamma", 200, -50, -50, 200, -50, 50);
 
-  h1_E_dep = new TH1F("E_dep", "E Dependence", 120, 0.0, 60.0);
+  h1_E_dep  = new TH1F("E_dep", "E Dependence", 120, 0.0, 60.0);
 
   h1_E_dep_smeared = new TH1F("E_dep_smeared", "E Dependence Smeared", 120, 0.0, 60.0);
 
@@ -194,9 +195,15 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
 
   //**************
   // RP
+
+  // This is a test for the git complict
+  // This is a test for the git complict
+  // This is a test for the git complict
 	
-  gDirectory->mkdir("RP");
-  gDirectory->cd("RP");
+  gDirectory->mkdir("RP") ;
+  gDirectory->cd("RP") ;
+
+  // This is a test for the git complict
 
 //  h2_RP_XY_g = new TH2F("RP_XY_global", "RP_XY_global", 100, -500, 500, 100, -500, 500); 
 //  h2_RP_XY_l = new TH2F("RP_XY_local", "RP_XY_local", 100, -50, 50, 100, -50, 50); 
