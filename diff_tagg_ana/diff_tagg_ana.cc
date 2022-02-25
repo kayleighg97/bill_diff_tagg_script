@@ -379,8 +379,8 @@ int diff_tagg_ana::InitRun(PHCompositeNode *topNode)
 //	  exit(0);
   	
   	rp_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_rpTruth");
-//  	rp_nodeparams->print();
-  	
+  	rp_nodeparams->print();
+  	exit(0);
   	rp2_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_rpTruth2");
 //  	rp2_nodeparams->print();
   	
@@ -459,19 +459,19 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
   if(event_itt%100 == 0)
      std::cout << "Event Processing Counter: " << event_itt << endl;
 
-  process_g4hits_ZDC(topNode);
+//  process_g4hits_ZDC(topNode);
 
   process_g4hits_RomanPots(topNode);
 
-  process_g4hits_B0(topNode);
-
-
-  /// Getting the Truth information
-  process_PHG4Truth_Primary_Particles(topNode);
-
-  process_PHG4Truth(topNode);
-  
-  process_g4hits_LowQ2Tagger(topNode);
+//  process_g4hits_B0(topNode);
+////
+////
+////  /// Getting the Truth information
+//  process_PHG4Truth_Primary_Particles(topNode);
+//
+//  process_PHG4Truth(topNode);
+//  
+//  process_g4hits_LowQ2Tagger(topNode);
 
   ////-------------------------
   ////Example for Getting the Hadron end cap hits and clusters
@@ -593,8 +593,7 @@ int diff_tagg_ana::process_PHG4Truth_Primary_Particles(PHCompositeNode* topNode)
 
 	m_truthpid = m_truthpid;
 
-    cout << setprecision(10) << "truth: " << m_truthpid << "  " << m_truthpx << "  " << m_truthpy 
-         << "  " << m_truthpz << endl;
+    cout << setprecision(10) << "truth: " << m_truthpid << "  " << m_truthpx << "  " << m_truthpy  << "  " << m_truthpz << endl;
 
     /// Fill the g4 truth tree
 //    m_truthtree->Fill();
@@ -817,6 +816,7 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
   /// Get the primary particle range
   PHG4TruthInfoContainer::Range range = truthinfo->GetPrimaryParticleRange();
 
+
   
   if (hits) {
 //    // this returns an iterator to the beginning and the end of our G4Hits
@@ -921,14 +921,25 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 	      cerr << "There is a issue finding the detector paramter node!" << endl;
 	   }
 
+
 //	   cout << hit_iter->second->get_z(0) << "    " << RP_1_params.get_double_param("place_z") << "    " 
 //              <<  Enclosure_params.get_double_param("place_z") + RP_1_params.get_double_param("place_z") - 50  << endl;
 
+	   RP_1_params.Print();
+//	   cout << RP_1_params.get_double_param("place_z") << endl;
+
+           return 0;
+
+	   exit(0);
+
 	   if (hit_iter->second->get_z(0) > Enclosure_params.get_double_param("place_z") + RP_1_params.get_double_param("place_z") - 50 &&    hit_iter->second->get_z(0) < Enclosure_params.get_double_param("place_z") + RP_1_params.get_double_param("place_z") + 50 ) {
  
+           return 0;
+
            h2_RP_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
 
 //	   float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), rp_nodeparams);
+
 
 	    PHParameters B0_1_params{"PHB0_1"};
 	
@@ -941,6 +952,7 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 
 	   //******************************
 	   /// Converting to the global coordinate, where the forward vacuum encloseure must be taken into account  
+
 
 	   float det_x_pos = Enclosure_params.get_double_param("place_x")  + RP_1_params.get_double_param("place_x");
 	   float det_z_pos = Enclosure_params.get_double_param("place_z")  + RP_1_params.get_double_param("place_z");
