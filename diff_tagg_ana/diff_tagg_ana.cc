@@ -387,8 +387,8 @@ int diff_tagg_ana::InitRun(PHCompositeNode *topNode)
   	
   	rp_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_rpTruth");
   	rp_nodeparams->print();
-  	exit(0);
-  	rp2_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_rpTruth2");
+
+	rp2_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_rpTruth2");
 //  	rp2_nodeparams->print();
   	
   	b0_nodeparams = findNode::getClass<PdbParameterMapContainer>(topNode, "G4GEOPARAM_b0Truth");
@@ -466,19 +466,19 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
   if(event_itt%100 == 0)
      std::cout << "Event Processing Counter: " << event_itt << endl;
 
-//  process_g4hits_ZDC(topNode);
+  process_g4hits_ZDC(topNode);
 
   process_g4hits_RomanPots(topNode);
 
-//  process_g4hits_B0(topNode);
-////
-////
-////  /// Getting the Truth information
-//  process_PHG4Truth_Primary_Particles(topNode);
+  process_g4hits_B0(topNode);
 //
-//  process_PHG4Truth(topNode);
-//  
-//  process_g4hits_LowQ2Tagger(topNode);
+//
+//  /// Getting the Truth information
+  process_PHG4Truth_Primary_Particles(topNode);
+
+  process_PHG4Truth(topNode);
+  
+  process_g4hits_LowQ2Tagger(topNode);
 
   ////-------------------------
   ////Example for Getting the Hadron end cap hits and clusters
@@ -932,16 +932,24 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 //	   cout << hit_iter->second->get_z(0) << "    " << RP_1_params.get_double_param("place_z") << "    " 
 //              <<  Enclosure_params.get_double_param("place_z") + RP_1_params.get_double_param("place_z") - 50  << endl;
 
-	   RP_1_params.Print();
-//	   cout << RP_1_params.get_double_param("place_z") << endl;
+//	   RP_1_params.Print();
+	
+//	   cout << "============================" << endl;
+//	   cout << RP_1_params.get_double_param("Layer1_pos_x") << endl;
+//	   cout << RP_1_params.get_double_param("Layer1_pos_z") << endl;
+//	   cout << RP_1_params.get_double_param("Layer1_rot_y") << endl;
+//	   cout << RP_1_params.get_double_param("Layer2_pos_x") << endl;
+//	   cout << RP_1_params.get_double_param("Layer2_pos_z") << endl;
+//	   cout << RP_1_params.get_double_param("Layer2_rot_y") << endl;
+	   
+	   //	   cout << RP_1_params.get_double_param("place_z") << endl;
 
-           return 0;
+//         return 0;
+//	   exit(0);
 
-	   exit(0);
-
-	   if (hit_iter->second->get_z(0) > Enclosure_params.get_double_param("place_z") + RP_1_params.get_double_param("place_z") - 50 &&    hit_iter->second->get_z(0) < Enclosure_params.get_double_param("place_z") + RP_1_params.get_double_param("place_z") + 50 ) {
+	   if (hit_iter->second->get_z(0) > Enclosure_params.get_double_param("place_z") + RP_1_params.get_double_param("Layer1_pos_z") - 50 &&    hit_iter->second->get_z(0) < Enclosure_params.get_double_param("place_z") + RP_1_params.get_double_param("Layer1_pos_z") + 50 ) {
  
-           return 0;
+//           return 0;
 
            h2_RP_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
 
@@ -1251,29 +1259,6 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
   return Fun4AllReturnCodes::EVENT_OK;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ///*****************************************************
