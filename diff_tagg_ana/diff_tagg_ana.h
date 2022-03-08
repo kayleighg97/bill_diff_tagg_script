@@ -23,13 +23,26 @@
 class Fun4AllHistoManager;
 class PHCompositeNode;
 class TFile;
+class TTree;
 class TNtuple;
+class CaloEvalStack;
+class CaloRawClusterEval;
+class RawClusterContainer;
+class SvtxTrackMap;
+class SvtxEvalStack;
+class SvtxTrackEval;
+class PHG4TruthInfoContainer;
 
 
 class diff_tagg_ana : public SubsysReco
 {
  public:
+  CaloEvalStack *_caloevalstack;
+  CaloEvalStack* _caloevalstackFEMC;
+  CaloEvalStack* _caloevalstackEEMC;
+  CaloEvalStack* _caloevalstackBECAL;
 
+  SvtxEvalStack *_svtxEvalStack;
 //  diff_tagg_ana(const std::string &name = "diff_tagg_ana");
   diff_tagg_ana(const std::string &name = "Diff_Tagg_ana", const std::string &fname = "MyNtuple.root");
 
@@ -73,7 +86,8 @@ class diff_tagg_ana : public SubsysReco
   int process_g4hits_B0(PHCompositeNode *);
 
   int process_g4hits_LowQ2Tagger(PHCompositeNode *);
-
+  int process_ClusterCalo(PHCompositeNode*, std::string);
+  int process_tracks(PHCompositeNode *);
 
   int process_g4hits(PHCompositeNode *, const std::string&);
   int process_g4clusters(PHCompositeNode *, const std::string&);
@@ -85,8 +99,106 @@ class diff_tagg_ana : public SubsysReco
 
 
 
-// private:
+ private:
+ 
+ TTree *tree;
 
+  float Epx;
+  float Epy;
+  float Epz;
+
+  float Ppx;
+  float Ppy;
+  float Ppz;
+
+  float Gpx;
+  float Gpy;
+  float Gpz;
+
+  float Pos_px;
+  float Pos_py;
+  float Pos_pz;
+
+  int RP1;
+  int RP2;
+  int BRP1;
+  int BRP2;
+  int RPhits;
+    
+  float RPx[10000];
+  float RPy[10000];
+  float RPz[10000];
+  float RP_px[10000];
+  float RP_py[10000];
+  float RP_pz[10000];
+  float RP_edep[10000];
+  float RPtruth_px[10000];
+  float RPtruth_py[10000];
+  float RPtruth_pz[10000];
+  float RPtruth_E[10000];
+  int RPind[10000];
+  
+  float BRPx[10000];
+  float BRPy[10000];
+  float BRPz[10000];
+  float BRP_px[10000];
+  float BRP_py[10000];
+  float BRP_pz[10000];
+  float BRP_edep[10000];
+  float BRPtruth_px[10000];
+  float BRPtruth_py[10000];
+  float BRPtruth_pz[10000];
+  float BRPtruth_E[10000];
+  int BRPind[10000];
+
+
+
+  Int_t B0hits;
+    
+  Float_t B0x[10000];
+  Float_t B0y[10000];
+  Float_t B0z[10000];
+  Float_t B0xloc[10000];
+  Float_t B0yloc[10000];
+  Float_t B0zloc[10000];
+  float B0_px[10000];
+  float B0_py[10000];
+  float B0_pz[10000];
+  float B0_edep[10000];
+  float B0truth_px[10000];
+  float B0truth_py[10000];
+  float B0truth_pz[10000];
+  float B0truth_E[10000];
+  Int_t B0ind[10000];
+    
+  int nHits;
+  int caloInd[10000];
+  float hitX[10000];
+  float hitY[10000];
+  float hitZ[10000];
+  float hitE[10000];
+  int hitPid[10000];
+  int hitsNtowers[10000];
+  int hitsEEMC;
+  int hitsFEMC;
+  int hitsBECAL;
+
+  int ntr;
+  float tr_px[10000];
+  float tr_py[10000];
+  float tr_pz[10000];
+  float tr_p[10000];
+  float tr_phi[10000];
+  float tr_eta[10000];
+  float charge[10000];
+  float tr_x[10000];
+  float tr_y[10000];
+  float tr_z[10000];
+  int tr_Pid[10000];
+
+  void initializeVariables();
+  void initializeTrees();
+  
  protected:
 
   std::string detector;
@@ -143,6 +255,20 @@ class diff_tagg_ana : public SubsysReco
 //  float Get_Local_X(float global_x, float global_y, float global_z) {return 1;};
   float Get_Local_X(float global_x, float global_y, float global_z, PHParameters Det_params);
   //---------------------
+    //---------------------
+  PHParameters Enclosure_params{"PHGEnclosure"};
+  PHParameters ZDC_params{"PHG4RP"};
+  PHParameters RP_1_params{"PHG4RP"};
+  PHParameters RP2_params{"PHG4RP2"};
+  PHParameters B0_params{"PHG4B0"};
+  PHParameters BeamLineMagnet_params{"PHG4BeamLinMagnet"};
+  PdbParameterMapContainer *encloseure_nodeparams; 
+  PdbParameterMapContainer *zdc_nodeparams; 
+  PdbParameterMapContainer *rp_nodeparams;
+  PdbParameterMapContainer *rp2_nodeparams;
+  PdbParameterMapContainer *b0_nodeparams;
+  PdbParameterMapContainer *beamlinemagnet_nodeparams; 
+  // From ejana
   // From ejana
 
   double true_q2;
