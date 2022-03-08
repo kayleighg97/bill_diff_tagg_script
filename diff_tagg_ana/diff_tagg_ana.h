@@ -256,19 +256,6 @@ class diff_tagg_ana : public SubsysReco
   float Get_Local_X(float global_x, float global_y, float global_z, PHParameters Det_params);
   //---------------------
     //---------------------
-  PHParameters Enclosure_params{"PHGEnclosure"};
-  PHParameters ZDC_params{"PHG4RP"};
-  PHParameters RP_1_params{"PHG4RP"};
-  PHParameters RP2_params{"PHG4RP2"};
-  PHParameters B0_params{"PHG4B0"};
-  PHParameters BeamLineMagnet_params{"PHG4BeamLinMagnet"};
-  PdbParameterMapContainer *encloseure_nodeparams; 
-  PdbParameterMapContainer *zdc_nodeparams; 
-  PdbParameterMapContainer *rp_nodeparams;
-  PdbParameterMapContainer *rp2_nodeparams;
-  PdbParameterMapContainer *b0_nodeparams;
-  PdbParameterMapContainer *beamlinemagnet_nodeparams; 
-  // From ejana
   // From ejana
 
   double true_q2;
