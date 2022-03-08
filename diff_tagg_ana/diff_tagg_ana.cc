@@ -139,10 +139,18 @@ diff_tagg_ana::diff_tagg_ana(const std::string &name, const std::string& filenam
  , outfilename(filename)
 {
   std::cout << "Diff_Tagg_example::Diff_Tagg_example(const std::string &name) Calling ctor" << std::endl;
+	 
+  _caloevalstackFEMC=nullptr;
+  _caloevalstackEEMC=nullptr;
+  _caloevalstackBECAL=nullptr;
+  _svtxEvalStack = nullptr;
 
   unsigned int seed = PHRandomSeed();  // fixed seed is handled in this funtcion
   m_RandomGenerator = gsl_rng_alloc(gsl_rng_mt19937);
   gsl_rng_set(m_RandomGenerator, seed);
+
+  initializeVariables();
+  initializeTrees();
 
 }
 
@@ -152,7 +160,10 @@ diff_tagg_ana::diff_tagg_ana(const std::string &name, const std::string& filenam
 //____________________________________________________________________________..
 diff_tagg_ana::~diff_tagg_ana()
 {
-
+  if(_caloevalstackBECAL) delete _caloevalstackBECAL;
+  if(_caloevalstackFEMC) delete _caloevalstackFEMC;
+  if(_caloevalstackEEMC) delete _caloevalstackEEMC;
+  if(_svtxEvalStack) delete _svtxEvalStack;
   gsl_rng_free(m_RandomGenerator);
 
   std::cout << "diff_tagg_ana::~diff_tagg_ana() Calling dtor" << std::endl;
@@ -458,13 +469,89 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
 
   _svtxEvalStack = new SvtxEvalStack(topNode);
   _svtxEvalStack->set_verbosity(Verbosity());
-
+  nHits=0;
+  hitsEEMC=0;
+  hitsFEMC=0;
+  hitsBECAL=0;
+  RP1 = 0;
+  RP2 =0;
+  RPhits=0;
+  B0hits=0;
+  ntr=0;
+  cout<<" event = "<<event_itt<<endl;
   ZDC_hit = 0;
 
   event_itt++; 
  
   if(event_itt%100 == 0)
      std::cout << "Event Processing Counter: " << event_itt << endl;
+	
+  PHG4TruthInfoContainer* m_TruthInfoContainer = findNode::getClass<PHG4TruthInfoContainer>(topNode,"G4TruthInfo");
+  PHG4Particle* primary = m_TruthInfoContainer->GetParticle(4);
+  // std::cout << "pid 1 = "<< primary->get_pid() << std::endl;
+  //PHG4TruthInfoContainer::ConstRange particles = m_TruthInfoContainer->GetPrimaryParticleRange();
+  Epx = primary->get_px();
+  Epy = primary->get_py();
+  Epz = primary->get_pz();
+
+  //if (m_TruthInfoContainer->GetParticle(0)!=0){
+  primary = m_TruthInfoContainer->GetParticle(3);
+  //std::cout << "pid 2 = "<< primary->get_pid() << std::endl;
+  Ppx = primary->get_px();
+  Ppy = primary->get_py();
+  Ppz = primary->get_pz();
+  // }
+  primary = m_TruthInfoContainer->GetParticle(2); //PID 11
+  //std::cout<< "pid 3 = " << primary->get_pid()<< std::endl;
+  Gpx = primary->get_px(); //GpX = decay electron, Pos_ will be positron
+  Gpy = primary->get_py();
+  Gpz = primary->get_pz();
+
+  primary = m_TruthInfoContainer->GetParticle(1);
+  Pos_px = primary->get_px(); //GpX = decay electron, Pos_ will be positron                                                                                                                               
+  Pos_py = primary->get_py();
+  Pos_pz = primary->get_pz();
+
+
+  if(!_caloevalstackFEMC){
+    _caloevalstackFEMC = new CaloEvalStack(topNode, "FEMC");
+    _caloevalstackFEMC->set_strict(true);
+  }
+  else{
+    _caloevalstackFEMC->next_event(topNode);
+  }
+
+  if(!_caloevalstackEEMC){
+    _caloevalstackEEMC = new CaloEvalStack(topNode, "EEMC");
+    _caloevalstackEEMC->set_strict(true);
+  }
+  else{
+    _caloevalstackEEMC->next_event(topNode);
+  }
+
+
+  if(!_caloevalstackBECAL){
+    _caloevalstackBECAL = new CaloEvalStack(topNode, "BECAL");
+    _caloevalstackBECAL->set_strict(true);
+  }
+  else{
+    _caloevalstackBECAL->next_event(topNode);
+  }
+
+  std::string caloName;
+  caloName="CLUSTER_FEMC";
+  process_ClusterCalo(topNode,caloName);
+  caloName="CLUSTER_EEMC";
+  process_ClusterCalo(topNode,caloName);
+  caloName="CLUSTER_BECAL";
+  process_ClusterCalo(topNode,caloName);
+  // process_g4hits(topNode);
+
+
+  process_tracks(topNode);
+  process_RomanPots(topNode);
+  process_B0(topNode);
+
 
   process_g4hits_ZDC(topNode);
 
@@ -496,6 +583,8 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
   // process_g4clusters(topNode, "EEMC");
   //
 
+  tree->Fill();
+	
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -518,7 +607,9 @@ int diff_tagg_ana::EndRun(const int runnumber)
 int diff_tagg_ana::End(PHCompositeNode *topNode)
 {
   std::cout << "diff_tagg_ana::End(PHCompositeNode *topNode) This is the End..." << std::endl;
-
+  if(_caloevalstackBECAL) delete _caloevalstackBECAL;
+  if(_caloevalstackFEMC) delete _caloevalstackFEMC;
+  if(_caloevalstackEEMC) delete _caloevalstackEEMC;
 
 //  h2_ZDC_XY->Write();
 //  h2_ZDC_XY_double->Write();
@@ -527,6 +618,9 @@ int diff_tagg_ana::End(PHCompositeNode *topNode)
 //  h1_E_dep_smeared->Write();
 
   outfile->cd();
+	
+  tree->Write();
+	
   g4hitntuple->Write();
   outfile->Write();
   outfile->Close();
@@ -554,7 +648,7 @@ void diff_tagg_ana::Print(const std::string &what) const
 //
 
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int diff_tagg_ana::process_PHG4Truth_Primary_Particles(PHCompositeNode* topNode) {
 
@@ -786,6 +880,7 @@ int diff_tagg_ana::process_g4hits_ZDC(PHCompositeNode* topNode)
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //***************************************************
 // Getting the RomanPots hits
@@ -828,9 +923,8 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
   if (hits) {
 //    // this returns an iterator to the beginning and the end of our G4Hits
     PHG4HitContainer::ConstRange hit_range = hits->getHits();
-
+    int counter = 0;
     for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++) {
-
 
 //	cout << "Roman pot hits? " << endl;
 //	cout << "This is where you can fill your loop " << endl;
@@ -866,58 +960,9 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 //   	   float m_truthpid = truth->get_pid();
 
 
-//	   Float_t RP_rotation = 0.047; 
-
-
-////*********************************************************
-//// RP location 
-//	  if (IP_design == "IP6") {
-//
-//         	const int rpDetNr = 2;
-//         	double_t* rp_zCent;
-//         	double_t* rp_xCent;  
-//         	rp_zCent = new double_t[rpDetNr]{2600, 2800};
-//         	rp_xCent = new double_t[rpDetNr]{-83.22, -92.20};
-//
-//	 	float local_x;
-//	 	float local_y;
-//
-//	 	if (hit_iter->second->get_z(0) < rp_zCent[0]+50 && hit_iter->second->get_z(0) >rp_zCent[0]-50 ) {
-//
-//  		    h2_RP_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
-//
-//  	   	    float det_rot = atan( rp_xCent[0] / rp_zCent[0]); 
-//        	    float det_tilt = 0.047; 
-//
-//		    local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
-//		    local_y = Get_Local_Y(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), det_tilt, det_rot) ;
-//
-//                    h2_RP_XY_l->Fill(local_x, local_y); 
-//
-//		    //---------------------------------------------
-//		    // Standarized Roman pot cut
-//		    //
-//		    if (local_x > -5. && local_x < 5. && local_y > -1.0 && local_y < 1.0)  {
-// 	            //// This is beam contribution here
-//	 	    } else {
-//		        ////This is where you signal is!
-//		        if (local_x > -12.5 && local_x < 12.5 && local_y > -5.0 && local_y < 5.0) {
-//		   	    h2_RP_XY_signal->Fill(local_x, local_y);
-//		        } 
-//		    }
-//	        } 
-//           } else {
-//
-//               h2_RP_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
-//
-//               float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), rp_nodeparams);
-//               float local_y = hit_iter->second->get_y(0);
-//
-//               h2_RP_XY_l->Fill(local_x, local_y); 
-//           }
-
 
 	   /// Generic filling algorithm
+	   if (hit_iter->second->get_hit_id() == 1 || hit_iter->second->get_hit_id() == 4294967297) {
 
 	   PHParameters RP_1_params{"PHRP_1"};
 	   
@@ -928,24 +973,6 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 	      cerr << "There is a issue finding the detector paramter node!" << endl;
 	   }
 
-
-//	   cout << hit_iter->second->get_z(0) << "    " << RP_1_params.get_double_param("place_z") << "    " 
-//              <<  Enclosure_params.get_double_param("place_z") + RP_1_params.get_double_param("place_z") - 50  << endl;
-
-//	   RP_1_params.Print();
-	
-//	   cout << "============================" << endl;
-//	   cout << RP_1_params.get_double_param("Layer1_pos_x") << endl;
-//	   cout << RP_1_params.get_double_param("Layer1_pos_z") << endl;
-//	   cout << RP_1_params.get_double_param("Layer1_rot_y") << endl;
-//	   cout << RP_1_params.get_double_param("Layer2_pos_x") << endl;
-//	   cout << RP_1_params.get_double_param("Layer2_pos_z") << endl;
-//	   cout << RP_1_params.get_double_param("Layer2_rot_y") << endl;
-	   
-	   //	   cout << RP_1_params.get_double_param("place_z") << endl;
-
-//         return 0;
-//	   exit(0);
 
 	   if (hit_iter->second->get_z(0) > Enclosure_params.get_double_param("place_z") + RP_1_params.get_double_param("Layer1_pos_z") - 50 &&    hit_iter->second->get_z(0) < Enclosure_params.get_double_param("place_z") + RP_1_params.get_double_param("Layer1_pos_z") + 50 ) {
  
@@ -991,25 +1018,35 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 
 //	   cout << local_x << "    " << RP_1_params.get_double_param("rot_y") << "    "  << RP_1_params.get_double_param("rot_y")*TMath::Pi()/180 << endl;
 //	   exit(0);
-
+	   RPx[RPhits] = local_x;
+	   RPy[RPhits] = local_y;
+	   RPz[RPhits] = hit_iter->second->get_z(0);
+	   RP_px[RPhits] = hit_iter->second->get_px(0);
+	   RP_py[RPhits] = hit_iter->second->get_py(0);
+	   RP_pz[RPhits] = hit_iter->second->get_pz(0);
+	   RP_edep[RPhits] = hit_iter->second->get_edep();
            h2_RP_XY_l->Fill(local_x, local_y);
-
+	   
+	   if(TMath::Abs(RPz[RPhits] - 2600.0)<50) RPind[RPhits ] = 1;
+	   if(TMath::Abs(RPz[RPhits] - 2800.0)<50) RPind[RPhits ] = 2;
+	   RPhits++;
+	   counter++;
                //---------------------------------------------
                // Standarized Roman pot cut
                //
-               if (local_x > -5. && local_x < 5. && local_y > -1.0 && local_y < 1.0)  {
+              // if (local_x > -5. && local_x < 5. && local_y > -1.0 && local_y < 1.0)  {
                
                	//// This is beam contribution here
                
-               } else {
+               //} else {
                
                	  ////This is where you signal is!
                	  //
-                  if (local_x > -12.5 && local_x < 12.5 && local_y > -5.0 && local_y < 5.0) {
-                       h2_RP_XY_signal->Fill(local_x, local_y);
+                 // if (local_x > -12.5 && local_x < 12.5 && local_y > -5.0 && local_y < 5.0) {
+                   //    h2_RP_XY_signal->Fill(local_x, local_y);
                
-                  }   
-               }
+                  //}   
+               //}
             }
 	 }
 
@@ -1026,82 +1063,96 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 int diff_tagg_ana::process_g4hits_B0(PHCompositeNode* topNode)
 {
 //  ostringstream nodename;
-//
-//
-////  cout << "Entering Romanpot?" << endl;
-//
-//  // loop over the G4Hits
-//  nodename.str("");
-////  nodename << "G4HIT_" << detector;
-////  nodename << "G4HIT_" << "ZDC";
-////  nodename << "G4HIT_" << "B0detectors_3";
-////  nodename << "G4HIT_" << "B0detectors_0";
-////  nodename << "G4HIT_" << "B0detectors_0";
-//  nodename << "G4HIT_" << "b0Truth";
-////  nodename << "G4HIT_" << "EEMC";
-//
-//
-////  cout << "Detector: " << nodename.str().c_str() << endl;
-//
-//  PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
-//
-//
-//  if (hits) {
-////    // this returns an iterator to the beginning and the end of our G4Hits
-//    PHG4HitContainer::ConstRange hit_range = hits->getHits();
-//
-//    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++) {
-//
-//
-////	cout << "B0 hits? " << endl;
-////	cout << "This is where you can fill your loop " << endl;
-//
-//	/// Generic filling algorithm
-//
-//	PHParameters B0_1_params{"PHB0_1"};
-//	
-//	if (b0_nodeparams)
-//	{
-//	   B0_1_params.FillFrom(b0_nodeparams, 0);
-//	} else {
-//	   cerr << "There is a issue finding the detector paramter node!" << endl;
-//	}
-//
-//
-//	float det_x_pos = B0_1_params.get_double_param("place_x") + Enclosure_params.get_double_param("place_x")  + BeamLineMagnet_params.get_double_param("place_x");
-//
-//	float det_z_pos = B0_1_params.get_double_param("place_z") + Enclosure_params.get_double_param("place_z")  + BeamLineMagnet_params.get_double_param("place_z");
-//
-/////	cout << hit_iter->second->get_z(0) << "    " <<  BeamLineMagnet_params.get_double_param("place_z") + Enclosure_params.get_double_param("place_z") << "    " <<  B0_1_params.get_double_param("place_z") << "    " << B0_1_params.get_double_param("length")/(b0DetNr + 1) * (0 - b0DetNr / 2) <<  "    " << BeamLineMagnet_params.get_double_param("length") << "    " << b0DetNr << "    " << z_pos << endl; 
-//
-//	B0_1_params.set_double_param("place_x", det_x_pos); 
-//	B0_1_params.set_double_param("place_z", det_z_pos); 
-//
-//
-//
-//	if (det_z_pos - 5 && det_z_pos + 5 ) {
-// 
-//	// b0Mag_zLen / (b0DetNr + 1) * (i - b0DetNr / 2)
-//	
-//
-////	  cout << "!!!!!!!!!!!!!!!!!1 " << endl;
-//	  h2_B0_XY_g->Fill(hit_iter->second->get_x(0), hit_iter->second->get_y(0));
-//
-////	  float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), rp_nodeparams);
-//
-//	  float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), B0_1_params);
-//          float local_y = hit_iter->second->get_y(0);
-//
-////	  cout << local_x << endl;
-//
-//          h2_B0_XY_l->Fill(local_x, local_y);
-//
-//      }
-//
-//    }
-//
-//  }
 
+  // loop over the G4Hits
+  nodename.str("");
+  nodename << "G4HIT_" << "b0Truth";
+
+  PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
+  PHG4TruthInfoContainer *truthinfo = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
+
+  if (!truthinfo)
+    {
+      cout << PHWHERE
+	   << "PHG4TruthInfoContainer node is missing, can't collect G4 truth particles"
+	   << endl;
+      return Fun4AllReturnCodes::EVENT_OK;
+    }
+
+  //Get the primary particle range
+  PHG4TruthInfoContainer::Range range = truthinfo->GetPrimaryParticleRange();
+
+  Int_t layer=-1;
+  if (hits) {
+    //this returns an iterator to the beginning and the end of our G4Hits
+    PHG4HitContainer::ConstRange hit_range = hits->getHits();
+
+    for (PHG4HitContainer::ConstIterator hit_iter = hit_range.first; hit_iter != hit_range.second; hit_iter++) {
+      for (PHG4TruthInfoContainer::ConstIterator iter = range.first; iter != range.second; ++iter){
+
+	  /// Get this truth particle
+	  const PHG4Particle *truth = iter->second;
+
+	  float m_truthpz = truth->get_pz();
+	  float m_truthenergy = truth->get_e();
+	  float m_trutheta = atanh(m_truthpz / m_truthenergy);
+	  /// Check for nans
+	  if (m_trutheta != m_trutheta)
+	    m_trutheta = -99;
+
+	  if ( truth->get_pid() == 2212 ){
+	    if( hit_iter->second->get_hit_id() == 1 || hit_iter->second->get_hit_id() == 4294967297 || hit_iter->second->get_hit_id() == 8589934593 || hit_iter->second->get_hit_id() == 12884901889 ) {
+
+        PHParameters B0_1_params{"PHB0_1"};
+
+	      if (b0_nodeparams){
+	           B0_1_params.FillFrom(b0_nodeparams, 0);
+	       }
+        else {
+	         cerr << "There is a issue finding the detector paramter node!" << endl;
+	      }
+        float det_x_pos = B0_1_params.get_double_param("place_x") + Enclosure_params.get_double_param("place_x")  + BeamLineMagnet_params.get_double_param("place_x");
+        float det_z_pos = B0_1_params.get_double_param("place_z") + Enclosure_params.get_double_param("place_z")  + BeamLineMagnet_params.get_double_param("place_z");
+        ///	cout << hit_iter->second->get_z(0) << "    " <<  BeamLineMagnet_params.get_double_param("place_z") + Enclosure_params.get_double_param("place_z") << "    " <<  B0_1_params.get_double_param("place_z") << "    " << B0_1_params.get_double_param("length")/(b0DetNr + 1) * (0 - b0DetNr / 2) <<  "    " << BeamLineMagnet_params.get_double_param("length") << "    " << b0DetNr << "    " << z_pos << endl;
+        B0_1_params.set_double_param("place_x", det_x_pos);
+        B0_1_params.set_double_param("place_z", det_z_pos);
+        float local_x = Get_Local_X(hit_iter->second->get_x(0), hit_iter->second->get_y(0), hit_iter->second->get_z(0), B0_1_params);
+        float local_y = hit_iter->second->get_y(0);
+
+	      B0x[B0hits] = local_x;
+	      B0y[B0hits] = local_y;
+	      B0z[B0hits] = (Float_t)hit_iter->second->get_z(0);
+
+	      B0xloc[B0hits] = (Float_t)hit_iter->second->get_local_x(0);
+	      B0yloc[B0hits] = (Float_t)hit_iter->second->get_local_y(0);
+	      B0zloc[B0hits] = (Float_t)hit_iter->second->get_local_z(0);
+
+	      B0_px[B0hits] = (Float_t)hit_iter->second->get_px(0);
+	      B0_py[B0hits] = (Float_t)hit_iter->second->get_py(0);
+	      B0_pz[B0hits] = (Float_t)hit_iter->second->get_pz(0);
+	      B0_edep[B0hits] = (Float_t)hit_iter->second->get_edep();
+	      B0truth_px[B0hits] = (Float_t)truth->get_px();
+	      B0truth_py[B0hits] = (Float_t)truth->get_py();
+	      B0truth_pz[B0hits] = (Float_t)truth->get_pz();
+	      B0truth_E[B0hits] = (Float_t)truth->get_e();
+
+	      if(TMath::Abs(B0z[B0hits] - 591.0)<5) {layer = 1;}
+	      if(TMath::Abs(B0z[B0hits] - 615.0)<5) {layer = 2;}
+	      if(TMath::Abs(B0z[B0hits] - 639.0)<5) {layer = 3;}
+	      if(TMath::Abs(B0z[B0hits] - 663.0)<5) {layer = 4;}
+
+	      //if(TMath::Abs(B0z[B0hits] - 541.0)<50) {layer = 1;}
+	      //if(TMath::Abs(B0z[B0hits] - 565.0)<50) {layer = 2;}
+	      //if(TMath::Abs(B0z[B0hits] - 589.0)<50) {layer = 3;}
+	      //if(TMath::Abs(B0z[B0hits] - 613.0)<50) {layer = 4;}
+
+	      B0ind[B0hits ] = layer;
+	      B0hits++;
+	    }//if hit_iter
+	  }//if truth conditions
+	}//for truth container
+    }//for hit container
+  }//if hits
   return Fun4AllReturnCodes::EVENT_OK;
 
 }
@@ -1260,6 +1311,135 @@ int diff_tagg_ana::process_g4hits_LowQ2Tagger(PHCompositeNode* topNode)
 
 }
 
+int diff_tagg_ana::process_ClusterCalo(PHCompositeNode* topNode, string caloName)
+{
+
+  //PHG4TruthInfoContainer* m_TruthInfoContainer = findNode::getClass<PHG4TruthInfoContainer>(topNode,"G4TruthInfo");
+  //PHG4Particle* primaryPart = m_TruthInfoContainer->GetParticle(2);
+
+
+  if(caloName == "CLUSTER_FEMC"){
+    CaloRawClusterEval* clusterevalFEMC = _caloevalstackFEMC->get_rawcluster_eval();
+    RawClusterContainer* clusters = findNode::getClass<RawClusterContainer>(topNode, caloName.c_str());
+    if(clusters){
+      RawClusterContainer::ConstRange cluster_range = clusters->getClusters();
+      for(RawClusterContainer::ConstIterator cluster_iter = cluster_range.first; cluster_iter != cluster_range.second; cluster_iter++){
+	if(!cluster_iter->second) continue;
+	float clX = cluster_iter->second->get_x();
+	float clY = cluster_iter->second->get_y();
+	float clZ = cluster_iter->second->get_z();
+	//float clPX = cluster_iter->second->get_px();
+	//float clPY = cluster_iter->second->get_py();
+	//float clPZ = cluster_iter->second->get_pz();
+	float clEn = cluster_iter->second->get_energy();
+
+	hitX[nHits] = clX;
+	hitY[nHits] = clY;
+	hitZ[nHits] = clZ;
+	//hitPX[nHits] = clPX;
+	//hitPY[nHits] = clPY;
+	//hitPZ[nHits] = clPZ;
+	hitE[nHits] = clEn;
+	caloInd[nHits] = 1;
+	hitsNtowers[nHits] = cluster_iter->second->getNTowers();
+	if(clusterevalFEMC){
+	  PHG4Particle* primary = clusterevalFEMC->max_truth_primary_particle_by_energy(cluster_iter->second);
+	  if(primary){
+	    hitPid[nHits] = primary->get_pid();
+	  }
+	}
+	nHits++;
+	hitsFEMC++;
+      } // for loop
+    } // clusters
+
+  } // FEMC
+
+  if(caloName == "CLUSTER_EEMC"){
+    CaloRawClusterEval* clusterevalEEMC = _caloevalstackEEMC->get_rawcluster_eval();
+    RawClusterContainer* clusters = findNode::getClass<RawClusterContainer>(topNode, caloName.c_str());
+    if(clusters){
+      RawClusterContainer::ConstRange cluster_range = clusters->getClusters();
+      for(RawClusterContainer::ConstIterator cluster_iter = cluster_range.first; cluster_iter != cluster_range.second; cluster_iter++){
+	if(!cluster_iter->second) continue;
+	float clX = cluster_iter->second->get_x();
+	float clY = cluster_iter->second->get_y();
+	float clZ = cluster_iter->second->get_z();
+	//float clPX = cluster_iter->second->get_px();
+	//float clPY = cluster_iter->second->get_py();
+	//float clPZ = cluster_iter->second->get_pz();
+	float clEn = cluster_iter->second->get_energy();
+
+	hitX[nHits] = clX;
+	hitY[nHits] = clY;
+	hitZ[nHits] = clZ;
+	//hitPX[nHits] = clPX;
+	//hitPY[nHits] = clPY;
+	//hitPZ[nHits] = clPZ;
+	hitE[nHits] = clEn;
+	caloInd[nHits] = 2;
+	hitsNtowers[nHits] = cluster_iter->second->getNTowers();
+
+	if(clusterevalEEMC){
+	  PHG4Particle* primary = clusterevalEEMC->max_truth_primary_particle_by_energy(cluster_iter->second);
+	  if(primary){
+	    hitPid[nHits] = primary->get_pid();
+	  }
+	}
+	nHits++;
+	hitsEEMC++;
+      } // for loop
+    } // clusters
+
+  } // EEMC
+
+
+
+  if(caloName == "CLUSTER_BECAL"){
+    CaloRawClusterEval* clusterevalBECAL = _caloevalstackBECAL->get_rawcluster_eval();
+    RawClusterContainer* clusters = findNode::getClass<RawClusterContainer>(topNode, caloName.c_str());
+    if(clusters){
+      RawClusterContainer::ConstRange cluster_range = clusters->getClusters();
+      for(RawClusterContainer::ConstIterator cluster_iter = cluster_range.first; cluster_iter != cluster_range.second; cluster_iter++){
+	if(!(cluster_iter->second)) continue;
+	float clX = cluster_iter->second->get_x();
+	float clY = cluster_iter->second->get_y();
+	float clZ = cluster_iter->second->get_z();
+	//float clPX = cluster_iter->second->get_px();
+	//float clPY = cluster_iter->second->get_py();
+	//float clPZ = cluster_iter->second->get_pz();
+	float clEn = cluster_iter->second->get_energy();
+
+	hitX[nHits] = clX;
+	hitY[nHits] = clY;
+	hitZ[nHits] = clZ;
+	//hitPX[nHits] = clPX;
+	//hitPY[nHits] = clPY;
+	//hitPZ[nHits] = clPZ;
+	hitE[nHits] = clEn;
+	caloInd[nHits] = 3;
+	hitsNtowers[nHits] = cluster_iter->second->getNTowers();
+
+	if(clusterevalBECAL){
+	  PHG4Particle* primary = clusterevalBECAL->max_truth_primary_particle_by_energy(cluster_iter->second);
+
+	  //int val;
+
+	  if(primary)
+	    {
+	      hitPid[nHits] = primary->get_pid();
+	    }
+	}
+	nHits++;
+	hitsBECAL++;
+      } // for loop
+
+    } // clusters
+
+  } // EEMC
+
+  return Fun4AllReturnCodes::EVENT_OK;
+}
 
 ///*****************************************************
 /// ZDC Energy and Poisition smearing functions
@@ -1607,6 +1787,189 @@ float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z,
 }
 
 
+void diff_tagg_ana::initializeTrees()
+{
+  tree = new TTree("T", "A tree for DVCS");
+
+  // tree->Branch("local_x", &local_x, "local_x/F");
+  //tree->Branch("local_y", &local_y, "local_y/F");
+
+  tree->Branch("Epx", &Epx, "Epx/F");
+  tree->Branch("Epy", &Epy, "Epy/F");
+  tree->Branch("Epz", &Epz, "Epz/F");
+
+  tree->Branch("Ppx", &Ppx, "Ppx/F");
+  tree->Branch("Ppy", &Ppy, "Ppy/F");
+  tree->Branch("Ppz", &Ppz, "Ppz/F");
+
+  tree->Branch("Gpx", &Gpx, "Gpx/F");
+  tree->Branch("Gpy", &Gpy, "Gpy/F");
+  tree->Branch("Gpz", &Gpz, "Gpz/F");
+
+  tree->Branch("Pos_px", &Pos_px, "Pos_px/F");
+  tree->Branch("Pos_py", &Pos_py, "Pos_py/F");
+  tree->Branch("Pos_pz", &Pos_pz, "Pos_pz/F");
+
+  tree->Branch("nHits",&nHits,"nHits/I");
+  tree->Branch("caloInd",&caloInd,"caloInd[nHits]/I");
+  tree->Branch("hitX",&hitX,"hitX[nHits]/F");
+  tree->Branch("hitY",&hitY,"hitY[nHits]/F");
+  tree->Branch("hitZ",&hitZ,"hitZ[nHits]/F");
+  //tree->Branch("hitPX",&hitPX,"hitPX[nHits]/F");
+  //tree->Branch("hitPY",&hitPY,"hitPY[nHits]/F");
+  //tree->Branch("hitPZ",&hitPZ,"hitPZ[nHits]/F");
+  tree->Branch("hitE",&hitE,"hitE[nHits]/F");
+  tree->Branch("hitPid",&hitPid,"hitPid[nHits]/I");
+  tree->Branch("hitsNtowers",&hitsNtowers,"hitsNtowers[nHits]/I");
+
+  tree->Branch("RP1",&RP1,"RP1/I");
+  tree->Branch("RP2",&RP2,"RP2/I");
+  tree->Branch("RPhits",&RPhits,"RPhits/I");
+  tree->Branch("RPx",&RPx,"RPx[RPhits]/F");
+  tree->Branch("RPy",&RPy,"RPy[RPhits]/F");
+  tree->Branch("RPz",&RPz,"RPz[RPhits]/F");
+  tree->Branch("RP_px",&RP_px,"RP_px[RPhits]/F");
+  tree->Branch("RP_py",&RP_py,"RP_py[RPhits]/F");
+  tree->Branch("RP_pz",&RP_pz,"RP_pz[RPhits]/F");
+  tree->Branch("RP_edep",&RP_edep,"RP_edep[RPhits]/F");
+  tree->Branch("RPind",&RPind,"RPind[RPhits]/I");
+
+  tree->Branch("B0hits",&B0hits,"B0hits/I");
+  tree->Branch("B0x",&B0x,"B0Px[B0hits]/F");
+  tree->Branch("B0y",&B0y,"B0y[B0hits]/F");
+  tree->Branch("B0z",&B0z,"B0z[B0hits]/F");
+  tree->Branch("B0xloc",&B0xloc,"B0xloc[B0hits]/F");
+  tree->Branch("B0yloc",&B0yloc,"B0yloc[B0hits]/F");
+  tree->Branch("B0zloc",&B0zloc,"B0zloc[B0hits]/F");
+  tree->Branch("B0_px",&B0_px,"B0_px[B0hits]/F");
+  tree->Branch("B0_py",&B0_py,"B0_py[B0hits]/F");
+  tree->Branch("B0_pz",&B0_pz,"B0_pz[B0hits]/F");
+  tree->Branch("B0_edep",&B0_edep,"B0_edep[B0hits]/F");
+  tree->Branch("B0truth_px",&B0truth_px,"B0truth_px[B0hits]/F");
+  tree->Branch("B0truth_py",&B0truth_py,"B0truth_py[B0hits]/F");
+  tree->Branch("B0truth_pz",&B0truth_pz,"B0truth_pz[B0hits]/F");
+  tree->Branch("B0truth_E",&B0truth_E,"B0truth_E[B0hits]/F");
+  tree->Branch("B0ind",&B0ind,"B0ind[B0hits]/I");
+
+
+  tree->Branch("ntr",&ntr,"ntr/I");
+  tree->Branch("tr_px",&tr_px,"tr_px[ntr]/F");
+  tree->Branch("tr_py",&tr_py,"tr_py[ntr]/F");
+  tree->Branch("tr_pz",&tr_pz,"tr_pz[ntr]/F");
+  tree->Branch("tr_p",&tr_p,"tr_p[ntr]/F");
+
+  tree->Branch("tr_x",&tr_x,"tr_x[ntr]/F");
+  tree->Branch("tr_y",&tr_y,"tr_y[ntr]/F");
+  tree->Branch("tr_z",&tr_z,"tr_z[ntr]/F");
+
+  tree->Branch("tr_phi",&tr_phi,"tr_phi[ntr]/F");
+  tree->Branch("tr_eta",&tr_eta,"tr_eta[ntr]/F");
+  tree->Branch("tr_Pid",&tr_Pid,"tr_Pid[ntr]/I");
+  tree->Branch("charge",&charge,"charge[ntr]/F");
+
+
+  tree->Branch("hitsEEMC",&hitsEEMC,"hitsEEMC/I");
+  tree->Branch("hitsFEMC",&hitsFEMC,"hitsFEMC/I");
+  tree->Branch("hitsBECAL",&hitsBECAL,"hitsBECAL/I");
+}
+
+
+void diff_tagg_ana::initializeVariables()
+{
+  Epx= -1000;
+  Epy= -1000;
+  Epz= -1000;
+
+  Ppx= -1000;
+  Ppy= -1000;
+  Ppz= -1000;
+  Gpx= -1000;
+  Gpy= -1000;
+  Gpz= -1000;
+  Pos_px= -1000;
+  Pos_py= -1000;
+  Pos_pz= -1000;
+
+  nHits=0;
+  ntr=0;
+  RPhits=0;
+  B0hits=0;
+  RP1=0;
+  RP2=0;
+  BRP1=0;
+  BRP2=0;
+
+  hitsEEMC=0;
+  hitsFEMC=0;
+  hitsBECAL=0;
+
+  for(int i=0;i<10000;i++){
+    hitsNtowers[i]=0;
+    caloInd[i]=-1;
+    hitX[i]=-1000;
+    hitY[i]=-1000;
+    hitZ[i]=-1000;
+    //hitPX[i]=-1000;
+    //hitPY[i]=-1000;
+    //hitPZ[i]=-1000;
+    hitE[i]=-1000;
+    hitPid[i]=0;
+
+    tr_px[i]=-1000;
+    tr_py[i]=-1000;
+    tr_pz[i]=-1000;
+    tr_p[i]=-1000;
+    tr_phi[i]=-1000;
+    tr_eta[i]=-1000;
+    charge[i]=-1000;
+    tr_x[i]=-1000;
+    tr_y[i]=-1000;
+    tr_z[i]=-1000;
+    tr_Pid[i]=0;
+
+    RPx[i]=-1000;
+    RPy[i]=-1000;
+    RPz[i]=-1000;
+    RP_px[i]=-1000;
+    RP_py[i]=-1000;
+    RP_pz[i]=-1000;
+    RPtruth_px[RPhits]=-1000;
+    RPtruth_py[RPhits]=-1000;
+    RPtruth_pz[RPhits]=-1000;
+    RPtruth_E[i]=-1000;
+    RPind[i]=-1;
+
+    BRPx[i]=-1000;
+    BRPy[i]=-1000;
+    BRPz[i]=-1000;
+    BRP_px[i]=-1000;
+    BRP_py[i]=-1000;
+    BRP_pz[i]=-1000;
+    BRPtruth_px[RPhits]=-1000;
+    BRPtruth_py[RPhits]=-1000;
+    BRPtruth_pz[RPhits]=-1000;
+    BRPtruth_E[i]=-1000;
+    BRPind[i]=-1;
+
+
+
+    B0x[i]=-1000;
+    B0y[i]=-1000;
+    B0z[i]=-1000;
+    B0xloc[i]=-1000;
+    B0yloc[i]=-1000;
+    B0zloc[i]=-1000;
+    B0_px[i]=-1000;
+    B0_py[i]=-1000;
+    B0_pz[i]=-1000;
+    B0_edep[i]=-1000;
+    B0truth_px[i]=-1000;
+    B0truth_py[i]=-1000;
+    B0truth_pz[i]=-1000;
+    B0truth_E[i]=-1000;
+    B0ind[i]=-1;
+  }
+}
 
 
 
