@@ -208,7 +208,7 @@ class diff_tagg_ana : public SubsysReco
   int process_ClusterCalo(PHCompositeNode*, std::string);
   int process_tracks(PHCompositeNode *);
 
-  int process_g4hits(PHCompositeNode *);
+  int process_g4hits(PHCompositeNode*);
   int process_g4clusters(PHCompositeNode *, const std::string&);
 
   int process_PHG4Truth(PHCompositeNode* topNode);
