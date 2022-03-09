@@ -197,8 +197,8 @@ class diff_tagg_ana : public SubsysReco
   int static_event_counter;
 
 
-  int process_RomanPots(PHCompositeNode *);
-  int process_B0(PHCompositeNode *);
+  int process_RomanPots(PHCompositeNode*);
+  int process_B0(PHCompositeNode*);
   
   int process_g4hits_ZDC(PHCompositeNode *);
   int process_g4hits_RomanPots(PHCompositeNode *);
@@ -206,7 +206,7 @@ class diff_tagg_ana : public SubsysReco
 
   int process_g4hits_LowQ2Tagger(PHCompositeNode *);
   int process_ClusterCalo(PHCompositeNode*, std::string);
-  int process_tracks(PHCompositeNode *);
+  int process_tracks(PHCompositeNode*);
 
   int process_g4hits(PHCompositeNode* topNode, const std::string&);
   int process_g4clusters(PHCompositeNode *, const std::string&);
