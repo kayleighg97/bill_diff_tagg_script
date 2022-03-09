@@ -1075,7 +1075,7 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
                    //    h2_RP_XY_signal->Fill(local_x, local_y);
                
                   //}   
-               //}
+               }
             }
 	 }
 
