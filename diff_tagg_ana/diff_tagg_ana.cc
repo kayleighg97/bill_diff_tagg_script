@@ -577,9 +577,9 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
   // process_g4hits(topNode);
 
 
-  process_tracks(topNode);
-  process_RomanPots(topNode);
-  process_B0(topNode);
+  //process_tracks(topNode);
+  //process_RomanPots(topNode);
+  //process_B0(topNode);
 
 
   process_g4hits_ZDC(topNode);
