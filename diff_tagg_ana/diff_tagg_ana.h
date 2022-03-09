@@ -81,27 +81,6 @@ class diff_tagg_ana : public SubsysReco
 
   void Print(const std::string &what = "ALL") const override;
 
-  int process_RomanPots(PHCompositeNode *);
-  int process_B0(PHCompositeNode *);
-  
-  int process_g4hits_ZDC(PHCompositeNode *);
-  int process_g4hits_RomanPots(PHCompositeNode *);
-  int process_g4hits_B0(PHCompositeNode *);
-
-  int process_g4hits_LowQ2Tagger(PHCompositeNode *);
-  int process_ClusterCalo(PHCompositeNode*, std::string);
-  int process_tracks(PHCompositeNode *);
-
-  int process_g4hits(PHCompositeNode *);
-  int process_g4clusters(PHCompositeNode *, const std::string&);
-
-  int process_PHG4Truth(PHCompositeNode* topNode);
-  int process_PHG4Truth_Primary_Particles(PHCompositeNode* topNode);
-
-
-
-
-
  private:
  
  TTree *tree;
@@ -216,6 +195,24 @@ class diff_tagg_ana : public SubsysReco
   gsl_rng* m_RandomGenerator;
 
   int static_event_counter;
+
+
+  int process_RomanPots(PHCompositeNode *);
+  int process_B0(PHCompositeNode *);
+  
+  int process_g4hits_ZDC(PHCompositeNode *);
+  int process_g4hits_RomanPots(PHCompositeNode *);
+  int process_g4hits_B0(PHCompositeNode *);
+
+  int process_g4hits_LowQ2Tagger(PHCompositeNode *);
+  int process_ClusterCalo(PHCompositeNode*, std::string);
+  int process_tracks(PHCompositeNode *);
+
+  int process_g4hits(PHCompositeNode *);
+  int process_g4clusters(PHCompositeNode *, const std::string&);
+
+  int process_PHG4Truth(PHCompositeNode* topNode);
+  int process_PHG4Truth_Primary_Particles(PHCompositeNode* topNode);
 
   //*********************************
   // ZDC Energy and Position smearing
