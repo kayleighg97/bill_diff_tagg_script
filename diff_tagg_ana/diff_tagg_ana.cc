@@ -79,6 +79,12 @@
 #include <phool/PHRandomSeed.h>
 #include <phool/getClass.h>
 #include <phool/phool.h>
+#include <g4eval/CaloEvalStack.h>
+//#include <calobase/RawCluster.h>
+#include <g4eval/CaloRawClusterEval.h>
+//#include <calobase/RawClusterContainer.h>
+#include <fun4all/SubsysReco.h>
+#include <calobase/RawTowerContainer.h>
 
 // G4Hits includes
 #include <g4main/PHG4Hit.h>
@@ -90,6 +96,8 @@
 
 #include <TFile.h>
 #include <TNtuple.h>
+#include <TTree.h>
+#include <TMath.h>
 
 #include <cassert>
 #include <sstream>
@@ -97,8 +105,20 @@
 #include <iostream>
 
 #include <gsl/gsl_randist.h>
-
 #include <gsl/gsl_rng.h>
+
+/// Tracking includes
+#include <g4vertex/GlobalVertex.h>
+#include <g4vertex/GlobalVertexMap.h>
+#include <trackbase_historic/SvtxTrack.h>
+#include <trackbase_historic/SvtxTrackMap.h>
+#include <trackbase_historic/SvtxVertex.h>
+#include <trackbase_historic/SvtxVertexMap.h>
+#include <g4eval/SvtxEvalStack.h>
+
+// G4Cells includes
+#include <g4detectors/PHG4Cell.h>
+#include <g4detectors/PHG4CellContainer.h>
 
 /// HEPMC truth includes
 #include <HepMC/GenEvent.h>
@@ -109,18 +129,27 @@
 /// Fun4All includes
 #include <g4main/PHG4Particle.h>
 #include <g4main/PHG4TruthInfoContainer.h>
-
 #include <g4main/PHG4Reco.h>
-
 #include <fun4all/Fun4AllServer.h>
 #include <fun4all/Fun4AllDstInputManager.h>
-
 #include <pdbcalbase/PdbParameterMap.h>
 #include <phparameter/PHParameters.h>
-
 #include <pdbcalbase/PdbParameterMapContainer.h>
 
-#include <g4eval/SvtxEvalStack.h>
+// Tower includes
+#include <calobase/RawTower.h>
+#include <calobase/RawTowerContainer.h>
+#include <calobase/RawTowerGeom.h>
+#include <calobase/RawTowerGeomContainer.h>
+
+/// HEPMC truth includes
+#include <HepMC/GenEvent.h>
+#include <HepMC/GenVertex.h>
+#include <phhepmc/PHHepMCGenEvent.h>
+#include <phhepmc/PHHepMCGenEventMap.h>
+
+
+
 //#include <coresoftware/blob/master/simulation/g4simulation/g4eval/SvtxEvalStack.h>
 //#include "/cvmfs/eic.opensciencegrid.org/ecce/gcc-8.3/release/release_new/new.1/include/g4eval/SvtxEvalStack.h"
 
