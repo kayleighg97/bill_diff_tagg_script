@@ -1091,7 +1091,7 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 
 int diff_tagg_ana::process_g4hits_B0(PHCompositeNode* topNode)
 {
-//  ostringstream nodename;
+ ostringstream nodename;
 
   // loop over the G4Hits
   nodename.str("");
