@@ -81,6 +81,9 @@ class diff_tagg_ana : public SubsysReco
 
   void Print(const std::string &what = "ALL") const override;
 
+  int process_RomanPots(PHCompositeNode *);
+  int process_B0(PHCompositeNode *);
+  
   int process_g4hits_ZDC(PHCompositeNode *);
   int process_g4hits_RomanPots(PHCompositeNode *);
   int process_g4hits_B0(PHCompositeNode *);
@@ -89,7 +92,7 @@ class diff_tagg_ana : public SubsysReco
   int process_ClusterCalo(PHCompositeNode*, std::string);
   int process_tracks(PHCompositeNode *);
 
-  int process_g4hits(PHCompositeNode *, const std::string&);
+  int process_g4hits(PHCompositeNode *);
   int process_g4clusters(PHCompositeNode *, const std::string&);
 
   int process_PHG4Truth(PHCompositeNode* topNode);
@@ -371,20 +374,22 @@ class diff_tagg_ana : public SubsysReco
   double m_truthp;
   int m_numparticlesinevent;
   int m_truthpid;
-
+  
   PHParameters Enclosure_params{"PHGEnclosure"};
   PHParameters ZDC_params{"PHG4RP"};
   PHParameters RP_1_params{"PHG4RP"};
   PHParameters RP2_params{"PHG4RP2"};
   PHParameters B0_params{"PHG4B0"};
   PHParameters BeamLineMagnet_params{"PHG4BeamLinMagnet"};
-
-  PdbParameterMapContainer *encloseure_nodeparams; 
-  PdbParameterMapContainer *zdc_nodeparams; 
+  
+  PdbParameterMapContainer *encloseure_nodeparams;
+  PdbParameterMapContainer *zdc_nodeparams;
   PdbParameterMapContainer *rp_nodeparams;
   PdbParameterMapContainer *rp2_nodeparams;
   PdbParameterMapContainer *b0_nodeparams;
-  PdbParameterMapContainer *beamlinemagnet_nodeparams; 
+  PdbParameterMapContainer *beamlinemagnet_nodeparams;
+  // From ejana
+
 
   TString IP_design;
 
