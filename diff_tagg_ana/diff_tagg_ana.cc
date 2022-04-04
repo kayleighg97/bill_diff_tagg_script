@@ -991,7 +991,7 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 
 
 	   /// Generic filling algorithm
-	   if (hit_iter->second->get_hit_id() == 1 || hit_iter->second->get_hit_id() == 4294967297) {
+	   if (hit_iter->second->get_hit_id() == 3 || hit_iter->second->get_hit_id() == 4294967297) {
 
 	   PHParameters RP_1_params{"PHRP_1"};
 	   
@@ -1095,7 +1095,7 @@ int diff_tagg_ana::process_g4hits_B0(PHCompositeNode* topNode)
 
   // loop over the G4Hits
   nodename.str("");
-  nodename << "G4HIT_" << "b0Truth";
+  nodename << "G4HIT_" << "b0Truth_0";
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
   PHG4TruthInfoContainer *truthinfo = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
@@ -1130,7 +1130,7 @@ int diff_tagg_ana::process_g4hits_B0(PHCompositeNode* topNode)
 	    m_trutheta = -99;
 
 	  if ( truth->get_pid() == 2212 ){
-	    if( hit_iter->second->get_hit_id() == 1 || hit_iter->second->get_hit_id() == 4294967297 || hit_iter->second->get_hit_id() == 8589934593 || hit_iter->second->get_hit_id() == 12884901889 ) {
+	    if( hit_iter->second->get_hit_id() == 3 || hit_iter->second->get_hit_id() == 4294967297 || hit_iter->second->get_hit_id() == 8589934593 || hit_iter->second->get_hit_id() == 12884901889 ) {
 
         PHParameters B0_1_params{"PHB0_1"};
 
