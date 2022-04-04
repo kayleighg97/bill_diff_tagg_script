@@ -926,7 +926,7 @@ int diff_tagg_ana::process_g4hits_RomanPots(PHCompositeNode* topNode)
 //  nodename << "G4HIT_" << detector;
 //  nodename << "G4HIT_" << "ZDC";
 //  nodename << "G4HIT_" << "RomanPots_0";
-  nodename << "G4HIT_" << "rpTruth";
+  nodename << "G4HIT_" << "rpTruth_VirtSheet";
 //  nodename << "G4HIT_" << "EEMC";
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
@@ -2001,4 +2001,50 @@ void diff_tagg_ana::initializeVariables()
 }
 
 
+int diff_tagg_ana::process_tracks(PHCompositeNode *topNode)
+{
+  SvtxTrackMap *trackmap = findNode::getClass<SvtxTrackMap>(topNode, "TrackMap");
+
+  if (!trackmap)
+    return Fun4AllReturnCodes::EVENT_OK;
+
+ // EvalStack for truth track matching
+    if(!_svtxEvalStack)
+        {
+          _svtxEvalStack = new SvtxEvalStack(topNode);
+           _svtxEvalStack->set_verbosity(Verbosity());
+         }
+    else{
+           _svtxEvalStack->next_event(topNode);
+         }
+  
+    SvtxTrackEval *trackeval = _svtxEvalStack->get_track_eval();
+//    PHG4TruthInfoContainer *truthinfo = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
+  
+    for (SvtxTrackMap::Iter iter = trackmap->begin();iter != trackmap->end();++iter)
+        {
+         SvtxTrack *track = iter->second;
+  
+         // Get the reconstructed track info
+         tr_px[ntr] = track->get_px();
+         tr_py[ntr] = track->get_py();
+         tr_pz[ntr] = track->get_pz();
+         tr_p[ntr] = TMath::Sqrt(tr_px[ntr] * tr_px[ntr] + tr_py[ntr] * tr_py[ntr] + tr_pz[ntr] * tr_pz[ntr]);
+  
+         tr_phi[ntr] = track->get_phi();
+         tr_eta[ntr] = track->get_eta();
+  
+         charge[ntr] = track->get_charge();
+         tr_x[ntr] = track->get_x();
+         tr_y[ntr] = track->get_y();
+         tr_z[ntr] = track->get_z();
+  
+         // Get truth track info that matches this reconstructed track
+         PHG4Particle *truthtrack = trackeval->max_truth_particle_by_nclusters(track);
+         if(truthtrack) tr_Pid[ntr] = truthtrack->get_pid();
+         ntr++;
+        }
+  return Fun4AllReturnCodes::EVENT_OK;
+}
+  
 
