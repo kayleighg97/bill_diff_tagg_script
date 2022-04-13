@@ -984,18 +984,18 @@ int diff_tagg_ana::process_B0(PHCompositeNode* topNode)
   nodename << "G4HIT_" << "b0Truth_0";
 
   PHG4HitContainer* hits = findNode::getClass<PHG4HitContainer>(topNode, nodename.str().c_str());
-  PHG4TruthInfoContainer *truthinfo = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
+//   PHG4TruthInfoContainer *truthinfo = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
 
-  if (!truthinfo)
-    {
-      cout << PHWHERE
-	   << "PHG4TruthInfoContainer node is missing, can't collect G4 truth particles"
-	   << endl;
-      return Fun4AllReturnCodes::EVENT_OK;
-    }
+//   if (!truthinfo)
+//     {
+//       cout << PHWHERE
+// 	   << "PHG4TruthInfoContainer node is missing, can't collect G4 truth particles"
+// 	   << endl;
+//       return Fun4AllReturnCodes::EVENT_OK;
+//     }
 
-  //Get the primary particle range
-  PHG4TruthInfoContainer::Range range = truthinfo->GetPrimaryParticleRange();
+//   //Get the primary particle range
+//   PHG4TruthInfoContainer::Range range = truthinfo->GetPrimaryParticleRange();
 
   Int_t layer=-1;
   if (hits) {
@@ -1794,7 +1794,7 @@ void diff_tagg_ana::initializeVariables()
   hitsFEMC=0;
   hitsBECAL=0;
 
-  for(int i=0;i<10000;i++){
+  for(int i=0;i<100;i++){
     hitsNtowers[i]=0;
     caloInd[i]=-1;
     hitX[i]=-1000;
