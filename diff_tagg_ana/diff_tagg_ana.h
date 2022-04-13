@@ -137,10 +137,10 @@ class diff_tagg_ana : public SubsysReco
   float RP_edep[100];
   int RPind[100];
   float RPtrkid[100];
-  float RPtruth_px[100]
-  float RPtruth_py[100]
-  float RPtruth_pz[100]
-  float RPtruth_E[100]
+  float RPtruth_px[100];
+  float RPtruth_py[100];
+  float RPtruth_pz[100];
+  float RPtruth_E[100];
   
   Int_t B0hits;
     
