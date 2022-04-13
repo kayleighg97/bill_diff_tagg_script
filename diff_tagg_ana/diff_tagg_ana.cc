@@ -251,7 +251,7 @@ int diff_tagg_ana::Init(PHCompositeNode *topNode)
   gDirectory->mkdir("B0");
   gDirectory->cd("B0");
 
-  h2_B0_XY_g = new TH2F("B0_XY_global", "B0_XY_global", 50, -50, 0, 50, -25, 25); 
+  h2_B0_XY = new TH2F("B0_XY_global", "B0_XY_global", 50, -50, 0, 50, -25, 25); 
   h2_B0_XY_l = new TH2F("B0_XY_local", "B0_XY_local", 50, -25, 25, 50, -25, 25); 
 
   gDirectory->cd("/");
@@ -627,7 +627,7 @@ int diff_tagg_ana::process_PHG4Truth(PHCompositeNode* topNode) {
 
 //***************************************************
 
-int diff_tagg_ana::process__ZDC(PHCompositeNode* topNode)
+int diff_tagg_ana::process_ZDC(PHCompositeNode* topNode)
 {
 
    ostringstream nodename;
@@ -1604,14 +1604,14 @@ int diff_tagg_ana::process_g4clusters(PHCompositeNode* topNode, const string& de
 
 //*******************************************
 //Local Coords Functions
-float excl_ana::Get_Local_Y(float global_x, float global_y, float global_z, float det_tilt, float cross_angle) {
+float diff_tagg_ana::Get_Local_Y(float global_x, float global_y, float global_z, float det_tilt, float cross_angle) {
 
 	return global_y;
 
 }
 
 
-float excl_ana::Get_Local_X(float global_x, float global_y, float global_z, float det_tilt, float det_rot) {
+float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z, float det_tilt, float det_rot) {
 
   TVector3 global_cor(global_x, global_y, global_z);
   float local_x;
@@ -1624,7 +1624,7 @@ float excl_ana::Get_Local_X(float global_x, float global_y, float global_z, floa
 }
 
 
-float excl_ana::Get_Local_X(float global_x, float global_y, float global_z, PdbParameterMapContainer *det_nodeparams) {
+float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z, PdbParameterMapContainer *det_nodeparams) {
   
   PHParameters Det_params{"PHDet"};
    
@@ -1652,7 +1652,7 @@ float excl_ana::Get_Local_X(float global_x, float global_y, float global_z, PdbP
 }
 
 
-float excl_ana::Get_Local_X(float global_x, float global_y, float global_z, PHParameters Det_params) {
+float diff_tagg_ana::Get_Local_X(float global_x, float global_y, float global_z, PHParameters Det_params) {
 
    float det_xCent = Det_params.get_double_param("Layer1_pos_x");
    float det_zCent = Det_params.get_double_param("Layer1_pos_z");
@@ -1824,23 +1824,23 @@ void diff_tagg_ana::initializeVariables()
     RP_px[i]=-1000;
     RP_py[i]=-1000;
     RP_pz[i]=-1000;
-    RPtruth_px[RPhits]=-1000;
-    RPtruth_py[RPhits]=-1000;
-    RPtruth_pz[RPhits]=-1000;
-    RPtruth_E[i]=-1000;
+//     RPtruth_px[RPhits]=-1000;
+//     RPtruth_py[RPhits]=-1000;
+//     RPtruth_pz[RPhits]=-1000;
+//     RPtruth_E[i]=-1000;
     RPind[i]=-1;
 
-    BRPx[i]=-1000;
-    BRPy[i]=-1000;
-    BRPz[i]=-1000;
-    BRP_px[i]=-1000;
-    BRP_py[i]=-1000;
-    BRP_pz[i]=-1000;
-    BRPtruth_px[RPhits]=-1000;
-    BRPtruth_py[RPhits]=-1000;
-    BRPtruth_pz[RPhits]=-1000;
-    BRPtruth_E[i]=-1000;
-    BRPind[i]=-1;
+//     BRPx[i]=-1000;
+//     BRPy[i]=-1000;
+//     BRPz[i]=-1000;
+//     BRP_px[i]=-1000;
+//     BRP_py[i]=-1000;
+//     BRP_pz[i]=-1000;
+//     BRPtruth_px[RPhits]=-1000;
+//     BRPtruth_py[RPhits]=-1000;
+//     BRPtruth_pz[RPhits]=-1000;
+//     BRPtruth_E[i]=-1000;
+//     BRPind[i]=-1;
 
 
 
