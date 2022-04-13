@@ -437,7 +437,7 @@ int diff_tagg_ana::process_event(PHCompositeNode *topNode)
   process_tracks(topNode);
   process_RomanPots(topNode);
   process_B0(topNode);
-  process_Q2tagger(topNode);
+  //process_Q2tagger(topNode);
   process_ZDC(topNode);
 	
   process_PHG4Truth_Primary_Particles(topNode);
