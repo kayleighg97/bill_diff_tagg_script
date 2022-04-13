@@ -1854,10 +1854,10 @@ void diff_tagg_ana::initializeVariables()
     B0_py[i]=-1000;
     B0_pz[i]=-1000;
     B0_edep[i]=-1000;
-    B0truth_px[i]=-1000;
-    B0truth_py[i]=-1000;
-    B0truth_pz[i]=-1000;
-    B0truth_E[i]=-1000;
+//     B0truth_px[i]=-1000;
+//     B0truth_py[i]=-1000;
+//     B0truth_pz[i]=-1000;
+//     B0truth_E[i]=-1000;
     B0ind[i]=-1;
   }
 }
