@@ -93,8 +93,6 @@ class diff_tagg_ana : public SubsysReco
   int process_g4hits_B0(PHCompositeNode *);
 
   int process_g4hits_LowQ2Tagger(PHCompositeNode *);
-  int process_tracks(PHCompositeNode*);
-
   int process_g4hits(PHCompositeNode* topNode, const std::string&);
   int process_g4clusters(PHCompositeNode *, const std::string&);
 
@@ -139,6 +137,10 @@ class diff_tagg_ana : public SubsysReco
   float RP_edep[100];
   int RPind[100];
   float RPtrkid[100];
+  float RPtruth_px[100]
+  float RPtruth_py[100]
+  float RPtruth_pz[100]
+  float RPtruth_E[100]
   
   Int_t B0hits;
     
@@ -254,9 +256,6 @@ class diff_tagg_ana : public SubsysReco
   bool  HIT_IN_ZDC; 
   bool  HIT_IN_HEC;	
 
-  double e_beam_energy;
-  double ion_beam_energy;
-  double crossing_angle;
 
   int b0DetNr;
 
@@ -286,7 +285,7 @@ class diff_tagg_ana : public SubsysReco
   TH2F* h2_RP_XY_signal; 
 
   // B0
-  TH2F* h2_B0_XY_g; 
+  TH2F* h2_B0_XY; 
   TH2F* h2_B0_XY_l; 
 
   // Low Q2 Tagger
