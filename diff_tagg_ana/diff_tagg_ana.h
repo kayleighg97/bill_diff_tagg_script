@@ -81,15 +81,18 @@ class diff_tagg_ana : public SubsysReco
 
   void Print(const std::string &what = "ALL") const override;
 
-  int process_RomanPots(PHCompositeNode*);
-  int process_B0(PHCompositeNode*);
+  int process_ZDC(PHCompositeNode *);
+  int process_RomanPots(PHCompositeNode *);//, int);
+  int process_B0(PHCompositeNode *);
+  int process_ClusterCalo(PHCompositeNode*, std::string);
+  int process_tracks(PHCompositeNode *);
+  int process_Q2tagger(PHCompositeNode *);
   
   int process_g4hits_ZDC(PHCompositeNode *);
   int process_g4hits_RomanPots(PHCompositeNode *);
   int process_g4hits_B0(PHCompositeNode *);
 
   int process_g4hits_LowQ2Tagger(PHCompositeNode *);
-  int process_ClusterCalo(PHCompositeNode*, std::string);
   int process_tracks(PHCompositeNode*);
 
   int process_g4hits(PHCompositeNode* topNode, const std::string&);
@@ -124,51 +127,33 @@ class diff_tagg_ana : public SubsysReco
   int BRP2;
   int RPhits;
     
-  float RPx[10000];
-  float RPy[10000];
-  float RPz[10000];
-  float RP_px[10000];
-  float RP_py[10000];
-  float RP_pz[10000];
-  float RP_edep[10000];
-  float RPtruth_px[10000];
-  float RPtruth_py[10000];
-  float RPtruth_pz[10000];
-  float RPtruth_E[10000];
-  int RPind[10000];
+  float RPx[100];
+  float RPy[100];
+  float RPz[100];
+  Float_t RPxloc[100];
+  Float_t RPyloc[100];
+  Float_t RPzloc[100];
+  float RP_px[100];
+  float RP_py[100];
+  float RP_pz[100];
+  float RP_edep[100];
+  int RPind[100];
+  float RPtrkid[100];
   
-  float BRPx[10000];
-  float BRPy[10000];
-  float BRPz[10000];
-  float BRP_px[10000];
-  float BRP_py[10000];
-  float BRP_pz[10000];
-  float BRP_edep[10000];
-  float BRPtruth_px[10000];
-  float BRPtruth_py[10000];
-  float BRPtruth_pz[10000];
-  float BRPtruth_E[10000];
-  int BRPind[10000];
-
-
-
   Int_t B0hits;
     
-  Float_t B0x[10000];
-  Float_t B0y[10000];
-  Float_t B0z[10000];
-  Float_t B0xloc[10000];
-  Float_t B0yloc[10000];
-  Float_t B0zloc[10000];
-  float B0_px[10000];
-  float B0_py[10000];
-  float B0_pz[10000];
-  float B0_edep[10000];
-  float B0truth_px[10000];
-  float B0truth_py[10000];
-  float B0truth_pz[10000];
-  float B0truth_E[10000];
-  Int_t B0ind[10000];
+  Float_t B0x[100];
+  Float_t B0y[100];
+  Float_t B0z[100];
+  Float_t B0xloc[100];
+  Float_t B0yloc[100];
+  Float_t B0zloc[100];
+  float B0_px[100];
+  float B0_py[100];
+  float B0_pz[100];
+  float B0_edep[100];
+  Int_t B0ind[100];
+  float B0trkid[100];
     
   int nHits;
   int caloInd[10000];
@@ -269,9 +254,9 @@ class diff_tagg_ana : public SubsysReco
   bool  HIT_IN_ZDC; 
   bool  HIT_IN_HEC;	
 
-//  double e_beam_energy;
-//  double ion_beam_energy;
-//  double crossing_angle;
+  double e_beam_energy;
+  double ion_beam_energy;
+  double crossing_angle;
 
   int b0DetNr;
 
